@@ -1,5 +1,3 @@
-# SmartAgriNode
-
 Smart Agriculture System: ML-based Weed Detection and Crop Recommendation
 Project Overview
 This project integrates Machine Learning and IoT to create a smart agriculture node capable of:
