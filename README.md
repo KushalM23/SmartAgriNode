@@ -2,27 +2,28 @@
 
 ## Smart Agriculture System: ML-Based Weed Detection & Crop Recommendation using IoT
 
-### verview
+
+### Overview
 
 SmartAgriNode integrates Machine Learning and IoT to help farmers with:
 
-Weed Detection: YOLOv8 deep learning model for detecting weeds in crop images.
+- Weed Detection: YOLOv8 deep learning model for detecting weeds in crop images.
 
-Crop Recommendation: Random Forest classifier for suggesting the best crop based on soil and environmental parameters.
+- Crop Recommendation: Random Forest classifier for suggesting the best crop based on soil and environmental parameters.
 
-IoT-ready: Designed for deployment on microcontrollers and sensor networks.
+IoT-ready: Designed for deployment on microcontrollers and sensor networks. This system reduces manual labor, improves crop yield, and enables data-driven agricultural decisions.
 
-This system reduces manual labor, improves crop yield, and enables data-driven agricultural decisions.
 
 ### Features
 
-YOLOv8-powered weed detection — identifies weeds with high accuracy.
+- YOLOv8-powered weed detection — identifies weeds with high accuracy.
 
-Random Forest-based crop recommendation — predicts the most suitable crop based on soil and climate inputs.
+- Random Forest-based crop recommendation — predicts the most suitable crop based on soil and climate inputs.
 
-Real-time sensing — can integrate with soil and weather sensors.
+- Real-time sensing — can integrate with soil and weather sensors.
 
-Outputs — annotated images, recommendation results, and logs.
+- Outputs — annotated images, recommendation results, and logs.
+
 
 ### Project Structure
 
@@ -79,6 +80,7 @@ Python 3.8+
 
 pip
 
+
 ### Setup
 
 ```git clone https://github.com/KushalM23/SmartAgriNode.git
@@ -111,9 +113,9 @@ Output: Recommended crop printed to console.
 
 ### Data Sources
 
-Weed Dataset: YOLO-compatible dataset (images/ and labels/) defined in data.yaml.
+- Weed Dataset: YOLO-compatible dataset (images/ and labels/) defined in data.yaml.
 
-Crop Dataset: Crop_ds.csv containing soil & environmental parameters with target crop labels.
+- Crop Dataset: Crop_ds.csv containing soil & environmental parameters with target crop labels.
 
 ### Model Training
 
@@ -136,9 +138,9 @@ Real-time monitoring dashboards (future expansion).
 
 Contributions are welcome!
 
-Fork the repo & create feature branches.
+- Fork the repo & create feature branches.
 
-Submit Pull Requests with proper documentation.
+- Submit Pull Requests with proper documentation.
 
 
 ### License
