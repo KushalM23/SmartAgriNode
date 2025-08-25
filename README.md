@@ -75,11 +75,11 @@ IoT-ready: Designed for deployment on microcontrollers and sensor networks. This
 ### Installation
 
 Prerequisites
-
-Python 3.8+
-
-pip
-
+```
+- Python 3.8+
+- pip
+- Jupyter Notebook
+```
 
 ### Setup
 
