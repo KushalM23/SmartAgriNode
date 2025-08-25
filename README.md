@@ -94,7 +94,8 @@ pip install -r requirements.txt
 
 Run YOLOv8 inference on a test image:
 
-```python Scripts/weed_detection.py --input test_images/run1.jpg --output Outputs/test_runs/WeedDetection/run1/
+```
+python Scripts/weed_detection.py --input test_images/run1.jpg --output Outputs/test_runs/WeedDetection/run1/
 ```
 Input: Path to crop field image.
 
