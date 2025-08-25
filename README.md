@@ -26,7 +26,7 @@ Outputs — annotated images, recommendation results, and logs.
 
 ###Project Structure
 
-SmartAgriNode/
+```SmartAgriNode/
 ├── data/
 │   ├── weeddataset/            # Dataset for YOLOv8 training/validation
 │   │   ├── train/
@@ -68,6 +68,7 @@ SmartAgriNode/
 │
 ├── requirements.txt             # Python dependencies
 └── README.md                    # Project documentation
+```
 
 
 ###Installation
