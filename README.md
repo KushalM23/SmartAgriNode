@@ -1,100 +1,144 @@
-Smart Agriculture System: ML-based Weed Detection and Crop Recommendation
-Project Overview
-This project integrates Machine Learning and IoT to create a smart agriculture node capable of:
+#SmartAgriNode
 
-Detecting weeds in crop fields using image data and a YOLOv8 deep learning model.
+##Smart Agriculture System: ML-Based Weed Detection & Crop Recommendation using IoT
 
-Recommending the most suitable crop based on real-time soil and environmental parameters using a Random Forest classifier.
+###Overview
 
-The system is designed to help farmers increase crop yield, reduce manual effort, and make data-driven decisions.
+SmartAgriNode integrates Machine Learning and IoT to help farmers with:
 
-Features
-Weed detection using a YOLOv8 model
+Weed Detection: YOLOv8 deep learning model for detecting weeds in crop images.
 
-Crop recommendation based on soil nutrients and weather inputs
+Crop Recommendation: Random Forest classifier for suggesting the best crop based on soil and environmental parameters.
 
-Compatible with microcontrollers and sensor nodes for deployment in the field
+IoT-ready: Designed for deployment on microcontrollers and sensor networks.
 
-Outputs include prediction logs, annotated images, and confidence scores
+This system reduces manual labor, improves crop yield, and enables data-driven agricultural decisions.
 
-Project Structure
-bash
-Copy
-Edit
-project-root/
+###Features
+
+YOLOv8-powered weed detection — identifies weeds with high accuracy.
+
+Random Forest-based crop recommendation — predicts the most suitable crop based on soil and climate inputs.
+
+Real-time sensing — can integrate with soil and weather sensors.
+
+Outputs — annotated images, recommendation results, and logs.
+
+###Project Structure
+
+SmartAgriNode/
+├── data/
+│   ├── weeddataset/            # Dataset for YOLOv8 training/validation
+│   │   ├── train/
+│   │   │   ├── images/
+│   │   │   └── labels/
+│   │   ├── val/
+│   │   │   ├── images/
+│   │   │   └── labels/
+│   │   └── test/
+│   │       ├── images/
+│   │       └── labels/
+│   └── data.yaml                # YOLO dataset config file
 │
-├── models/
-│ ├── weed_detection/ # YOLOv8 weights and model files
-│ └── crop_recommendation/ # Random Forest model (e.g., .pkl file)
+├── Crop_ds.csv                  # Dataset for crop recommendation
 │
-├── datasets/
-│ ├── weed_images/ # Images used for training/testing weed model
-│ └── crop_data.csv # Crop dataset with soil and weather features
+├── Notebooks/                   # Jupyter notebooks for experiments
+│   ├── CropModel_train.ipynb    # Training notebook for crop recommendation model
+│   ├── WeedModel_train.ipynb    # Training notebook for weed detection (YOLO)
+│   └── predict.ipynb            # Example inference notebook
 │
-├── outputs/
-│ ├── weed_detection/ # Annotated prediction images and logs
-│ └── crop_recommendation/ # Logs of crop prediction results
+├── Outputs/
+│   └── test_runs/WeedDetection/ # Output from YOLO inference
+│       ├── run1/
+│       │   └── run1.jpg
+│       ├── run2/
+│       │   └── run2.jpg
+│       └── run3/
+│           └── run3.jpg
 │
-├── scripts/
-│ ├── run_weed_detection.py # Script to run YOLOv8 inference
-│ ├── run_crop_recommend.py # Script for crop recommendation
-│ └── utils.py # Utility functions
+├── Scripts/
+│   ├── crop_recommendation.py   # Inference script for crop recommendation
+│   ├── weed_detection.py        # Inference script for weed detection
+│   └── main.py                  # Unified entry point (if applicable)
 │
-├── test_images/ # Sample images for weed detection
-├── requirements.txt # List of Python dependencies
-└── README.md # Project documentation
-How to Run
+├── test_images/                 # Sample test images for weed detection
+│   ├── run1.jpg
+│   ├── run2.jpg
+│   └── run3.jpg
+│
+├── requirements.txt             # Python dependencies
+└── README.md                    # Project documentation
 
-1. Clone the Repository
-   bash
-   Copy
-   Edit
-   git clone https://github.com/yourusername/smart-agriculture-node.git
-   cd smart-agriculture-node
-2. Install Dependencies
-   nginx
-   Copy
-   Edit
-   pip install -r requirements.txt
-3. Run Weed Detection
-   bash
-   Copy
-   Edit
-   python scripts/run_weed_detection.py --img test_images/sample1.jpg
-   The output will be saved in outputs/weed_detection/ with the prediction image and detection log.
 
-4. Run Crop Recommendation
-   bash
-   Copy
-   Edit
-   python scripts/run_crop_recommend.py --input "95,67,64,15,38,3,64"
-   The recommended crop will be printed based on the input values.
+###Installation
 
-Model Details
-Weed Detection
-Model: YOLOv8
+Prerequisites
 
-Trained on: Custom-labeled dataset of crop field images
+Python 3.8+
 
-Output: Bounding boxes with confidence scores for weed detection
+pip
 
-Crop Recommendation
-Model: Random Forest Classifier
+###Setup
 
-Trained on: Soil and weather dataset
+git clone https://github.com/KushalM23/SmartAgriNode.git
+cd SmartAgriNode
+pip install -r requirements.txt
 
-Input Features: Nitrogen, Phosphorus, Potassium, Temperature, Humidity, pH, Rainfall
+###Usage
 
-Output: Recommended crop label
+1. Weed Detection
 
-Integration Notes
-This system can be integrated with:
+Run YOLOv8 inference on a test image:
 
-Microcontrollers like NodeMCU or ESP32 to collect sensor input
+python Scripts/weed_detection.py --input test_images/run1.jpg --output Outputs/test_runs/WeedDetection/run1/
 
-Web dashboard for viewing predictions
+Input: Path to crop field image.
 
-Automated drones or robots for capturing field images
+Output: Annotated image with weeds marked.
 
-License
-This project is licensed under the MIT License.
+2. Crop Recommendation
+
+Run the crop recommendation script:
+
+python Scripts/crop_recommendation.py --soil_n 20 --soil_p 15 --soil_k 5 --temperature 25 --ph 6.5 --rainfall 100
+
+Parameters: Soil nutrients & weather conditions.
+
+Output: Recommended crop printed to console.
+
+
+###Data Sources
+
+Weed Dataset: YOLO-compatible dataset (images/ and labels/) defined in data.yaml.
+
+Crop Dataset: Crop_ds.csv containing soil & environmental parameters with target crop labels.
+
+###Model Training
+
+Use WeedModel_train.ipynb to train YOLOv8 on weed dataset.
+
+Use CropModel_train.ipynb to train Random Forest classifier on crop dataset.
+
+###IoT Integration
+
+This system is designed for deployment with:
+
+Microcontrollers (ESP32).
+
+Sensors (NPK, soil moisture, pH, temperature, rainfall).
+
+Real-time monitoring dashboards (future expansion).
+
+
+###Contributing
+
+Contributions are welcome!
+
+Fork the repo & create feature branches.
+
+Submit Pull Requests with proper documentation.
+
+
+###License
+
+MIT License
