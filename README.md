@@ -29,7 +29,7 @@ IoT-ready: Designed for deployment on microcontrollers and sensor networks. This
 
 ```SmartAgriNode/
 ├── data/
-│   ├── weeddataset/            # Dataset for YOLOv8 training/validation
+│   ├── weeddataset/                        # Dataset for Weed Detection training/validation
 │   │   ├── train/
 │   │   │   ├── images/
 │   │   │   └── labels/
@@ -39,36 +39,35 @@ IoT-ready: Designed for deployment on microcontrollers and sensor networks. This
 │   │   └── test/
 │   │       ├── images/
 │   │       └── labels/
-│   └── data.yaml                # YOLO dataset config file
+│   └── data.yaml                           # Weed detection dataset config file
 │
-├── Crop_ds.csv                  # Dataset for crop recommendation
+│── Models/
+│   ├── crop_recommendation_model.pkl       # Crop recommendation model file
+│   └── weed_detection_model.pt             # Weed detection model file
 │
-├── Notebooks/                   # Jupyter notebooks for experiments
-│   ├── CropModel_train.ipynb    # Training notebook for crop recommendation model
-│   ├── WeedModel_train.ipynb    # Training notebook for weed detection (YOLO)
-│   └── predict.ipynb            # Example inference notebook
+├── Crop_ds.csv                             # Dataset for crop recommendation
+│
+├── Notebooks/                              # Jupyter notebooks for experiments
+│   ├── CropModel_train.ipynb               # Training notebook for crop recommendation model
+│   ├── WeedModel_train.ipynb               # Training notebook for weed detection (YOLO)
+│   ├── predict.ipynb                       # Example prediction inference
+│   └── yolov8n.pt                          # Imported yolov8 nano model from ultralytics
 │
 ├── Outputs/
-│   └── test_runs/WeedDetection/ # Output from YOLO inference
-│       ├── run1/
+│   └── test_runs/WeedDetection/            # Output from Weed detection testing
 │       │   └── run1.jpg
 │       ├── run2/
 │       │   └── run2.jpg
 │       └── run3/
 │           └── run3.jpg
-│
-├── Scripts/
-│   ├── crop_recommendation.py   # Inference script for crop recommendation
-│   ├── weed_detection.py        # Inference script for weed detection
-│   └── main.py                  # Unified entry point (if applicable)
-│
-├── test_images/                 # Sample test images for weed detection
+|
+├── test_images/                            # Sample test images for weed detection
 │   ├── run1.jpg
 │   ├── run2.jpg
 │   └── run3.jpg
 │
-├── requirements.txt             # Python dependencies
-└── README.md                    # Project documentation
+├── requirements.txt                        # Python dependencies
+└── README.md                               # Project documentation
 ```
 
 

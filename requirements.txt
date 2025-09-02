@@ -7,5 +7,4 @@ joblib
 ultralytics  # YOLOv8 package
 
 # Optional: if you use Jupyter for experiments
-jupyter
-notebook
+Jupyter
