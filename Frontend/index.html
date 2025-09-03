@@ -3,180 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartAgriNode</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>SmartAgriNode - AI-Powered Agriculture Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="home" class="home-container">
-        <nav class="main-nav">
-            <div class="logo">SmartAgriNode</div>
-            <div class="nav-links">
-                <a href="#" class="nav-link" onclick="requireAuth('crop')">Crop Recommendation</a>
-                <a href="#" class="nav-link" onclick="requireAuth('weed')">Weed Detection</a>
-                <div class="auth-buttons">
-                    <button onclick="showAuthForms('login')" class="nav-btn">Login</button>
-                    <button onclick="showAuthForms('signup')" class="nav-btn">Sign Up</button>
-                </div>
-            </div>
-        </nav>
-        <div class="hero-section">
-            <h1>Welcome to SmartAgriNode</h1>
-            <p>Welcome to the future of smart agriculture. SmartAgriNode combines AI technology with agricultural expertise to revolutionize farming practices. Our advanced system provides precise crop recommendations based on soil conditions and environmental factors, while our image processing technology accurately detects and identifies weeds in your fields. Whether you're a small scale farmer or managing large agricultural operations, SmartAgriNode is your partner in maximizing yield and maintaining healthy crops sustainably.</p>
-            <div class="hero-buttons">
-                <button onclick="showAuthForms('login')" class="cta-btn">Get Started</button>
-            </div>
-        </div>
-        <div class="features-preview">
-            <div class="preview-card">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
                 <i class="fas fa-seedling"></i>
-                <h3>Crop Recommendation</h3>
-                <p>Get AI-powered suggestions for the best crops based on your soil conditions</p>
+                <span>SmartAgriNode</span>
             </div>
-            <div class="preview-card">
-                <i class="fas fa-camera"></i>
-                <h3>Weed Detection</h3>
-                <p>Detect and identify weeds in your crops using advanced image processing</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="auth-forms" class="auth-container" style="display: none;">
-        <a href="#" onclick="showHome()" class="logo">SmartAgriNode</a>
-        <div class="form-container" id="login-form">
-            <h2>Login</h2>
-            <form>
-                <div class="input-group">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" placeholder="Email" required>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#crop-recommendation" class="nav-link">Crop Recommendation</a>
+                <a href="#weed-detection" class="nav-link">Weed Detection</a>
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn btn-outline" onclick="showLoginModal()">Login</button>
+                    <button class="btn btn-primary" onclick="showRegisterModal()">Sign Up</button>
                 </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" placeholder="Password" required>
-                </div>
-                <button type="submit">Login</button>
-            </form>
-            <p>Don't have an account? <a href="#" onclick="toggleForms()">Sign up</a></p>
-        </div>
-
-        <div class="form-container" id="signup-form" style="display: none;">
-            <h2>Sign Up</h2>
-            <form>
-                <div class="input-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" placeholder="Full Name" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" placeholder="Email" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" placeholder="Password" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" placeholder="Confirm Password" required>
-                </div>
-                <button type="submit">Sign Up</button>
-            </form>
-            <p>Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
-        </div>
-    </div>
-
-    <div id="dashboard" class="dashboard" style="display: none;">
-        <nav class="main-nav">
-            <div class="logo" onclick="showDashboardSection('home')">SmartAgriNode</div>
-            <div class="nav-links">
-                <a href="#" class="nav-btn" onclick="showDashboardSection('crop')">Crop Recommendation</a>
-                <a href="#" class="nav-btn" onclick="showDashboardSection('weed')">Weed Detection</a>
-                <div class="profile-container">
-                    <div class="profile-icon">
-                        <i class="fas fa-user-circle"></i>
-                        <span id="user-name" class="user-name"></span>
-                    </div>
-                    <button onclick="logout()" class="logout-btn">Logout</button>
+                <div class="user-info" id="user-info" style="display: none;">
+                    <span id="username-display"></span>
+                    <button class="btn btn-outline" onclick="logout()">Logout</button>
                 </div>
             </div>
-        </nav>
-
-        <div id="dashboard-home" class="dashboard-section">
-            <div class="hero-section">
-                <h1>Welcome to SmartAgriNode</h1>
-                <p>Welcome to the future of smart agriculture. SmartAgriNode combines AI technology with agricultural expertise to revolutionize farming practices. Our advanced system provides precise crop recommendations based on soil conditions and environmental factors, while our image processing technology accurately detects and identifies weeds in your fields. Whether you're a small-scale farmer or managing large agricultural operations, SmartAgriNode is your partner in maximizing yield and maintaining healthy crops sustainably.</p>
-            </div>
-            <div class="dashboard-cards">
-                <div class="dash-card" onclick="showDashboardSection('crop')">
-                    <i class="fas fa-seedling"></i>
-                    <h3>Crop Recommendation</h3>
-                    <p>Get personalized crop suggestions</p>
-                </div>
-                <div class="dash-card" onclick="showDashboardSection('weed')">
-                    <i class="fas fa-camera"></i>
-                    <h3>Weed Detection</h3>
-                    <p>Scan your field for weeds</p>
-                </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
             </div>
         </div>
+    </nav>
 
-        <div id="dashboard-crop" class="dashboard-section" style="display: none;">
-            <div class="feature-card">
-                <h2>Crop Recommendation</h2>
-                <form id="crop-form">
-                    <div class="input-grid">
-                        <div class="input-group">
-                            <i class="fas fa-flask"></i>
-                            <input type="number" placeholder="Nitrogen (N)" required>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="text-gradient">AI-Powered</span> Agriculture Solutions
+            </h1>
+            <p class="hero-subtitle">
+                Leverage machine learning to optimize crop selection and detect weeds with precision
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary btn-large" onclick="scrollToSection('crop-recommendation')">
+                    <i class="fas fa-leaf"></i>
+                    Get Crop Recommendations
+                </button>
+                <button class="btn btn-outline btn-large" onclick="scrollToSection('weed-detection')">
+                    <i class="fas fa-search"></i>
+                    Detect Weeds
+                </button>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="floating-card">
+                <i class="fas fa-brain"></i>
+                <span>ML Models</span>
+            </div>
+            <div class="floating-card">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="floating-card">
+                <i class="fas fa-robot"></i>
+                <span>AI</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Crop Recommendation Section -->
+    <section id="crop-recommendation" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-leaf"></i>
+                    Crop Recommendation
+                </h2>
+                <p class="section-subtitle">
+                    Input soil and environmental parameters to get AI-powered crop recommendations
+                </p>
+            </div>
+            
+            <div class="crop-form-container">
+                <form id="crop-form" class="crop-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="N">Nitrogen (N)</label>
+                            <input type="number" id="N" name="N" step="0.01" required>
+                            <small>Soil nitrogen content</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-flask"></i>
-                            <input type="number" placeholder="Phosphorus (P)" required>
+                        <div class="form-group">
+                            <label for="P">Phosphorus (P)</label>
+                            <input type="number" id="P" name="P" step="0.01" required>
+                            <small>Soil phosphorus content</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-flask"></i>
-                            <input type="number" placeholder="Potassium (K)" required>
+                        <div class="form-group">
+                            <label for="K">Potassium (K)</label>
+                            <input type="number" id="K" name="K" step="0.01" required>
+                            <small>Soil potassium content</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-temperature-high"></i>
-                            <input type="number" placeholder="Temperature (°C)" required>
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" name="temperature" step="0.01" required>
+                            <small>Average temperature</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-tint"></i>
-                            <input type="number" placeholder="Humidity (%)" required>
+                        <div class="form-group">
+                            <label for="humidity">Humidity (%)</label>
+                            <input type="number" id="humidity" name="humidity" step="0.01" required>
+                            <small>Relative humidity</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-vial"></i>
-                            <input type="number" placeholder="pH" required step="0.1">
+                        <div class="form-group">
+                            <label for="ph">pH Level</label>
+                            <input type="number" id="ph" name="ph" step="0.01" min="0" max="14" required>
+                            <small>Soil pH value</small>
                         </div>
-                        <div class="input-group">
-                            <i class="fas fa-cloud-rain"></i>
-                            <input type="number" placeholder="Rainfall (mm)" required>
+                        <div class="form-group">
+                            <label for="rainfall">Rainfall (mm)</label>
+                            <input type="number" id="rainfall" name="rainfall" step="0.01" required>
+                            <small>Annual rainfall</small>
                         </div>
                     </div>
-                    <button type="submit">Get Recommendation</button>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-magic"></i>
+                        Get Recommendation
+                    </button>
                 </form>
-                <div id="crop-result" class="result-box"></div>
-            </div>
-        </div>
-
-        <div id="dashboard-weed" class="dashboard-section" style="display: none;">
-            <div class="feature-card">
-                <h2>Weed Detection</h2>
-                <form id="weed-form">
-                    <div class="upload-container">
-                        <input type="file" id="image-upload" accept="image/*" hidden>
-                        <label for="image-upload" class="upload-label">
-                            <div id="upload-text">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Click to upload image</span>
+                
+                <div id="crop-result" class="crop-result" style="display: none;">
+                    <div class="result-card">
+                        <h3>Recommended Crop</h3>
+                        <div class="crop-display">
+                            <i class="fas fa-seedling"></i>
+                            <span id="recommended-crop"></span>
+                        </div>
+                        <div class="confidence-meter">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill"></div>
                             </div>
-                            <img id="preview-image" style="display: none;">
-                        </label>
+                            <span id="confidence-text">95% Confidence</span>
+                        </div>
                     </div>
-                    <button type="submit">Detect Weeds</button>
-                </form>
-                <div id="weed-result" class="result-box"></div>
+                </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Weed Detection Section -->
+    <section id="weed-detection" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-search"></i>
+                    Weed Detection
+                </h2>
+                <p class="section-subtitle">
+                    Upload an image to detect and identify weeds using our advanced AI model
+                </p>
+            </div>
+            
+            <div class="weed-detection-container">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Upload Image</h3>
+                        <p>Drag and drop an image here or click to browse</p>
+                        <input type="file" id="image-input" accept="image/*" style="display: none;">
+                        <button class="btn btn-outline" onclick="document.getElementById('image-input').click()">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="image-preview" class="image-preview" style="display: none;">
+                    <h4>Selected Image</h4>
+                    <img id="preview-image" alt="Preview">
+                    <button class="btn btn-primary" onclick="submitWeedDetection()">
+                        <i class="fas fa-search"></i>
+                        Detect Weeds
+                    </button>
+                </div>
+                
+                <div id="weed-result" class="weed-result" style="display: none;">
+                    <div class="result-images">
+                        <div class="image-container">
+                            <h4>Original Image</h4>
+                            <img id="original-image" alt="Original image">
+                        </div>
+                        <div class="image-container">
+                            <h4>Detection Result</h4>
+                            <img id="result-image" alt="Detection result">
+                        </div>
+                    </div>
+                    <div class="detection-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-crosshairs"></i>
+                            <span>Detections: <span id="detection-count">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login-modal')">&times;</span>
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register-modal')">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Processing...</p>
         </div>
     </div>
 

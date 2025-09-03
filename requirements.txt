@@ -2,9 +2,18 @@
 pandas
 scikit-learn
 joblib
+Flask
+Flask-Cors
+Flask-SQLAlchemy
+Flask-Login
+Werkzeug
 
-#YOLOv8
+# YOLOv8
 ultralytics  # YOLOv8 package
+
+# Image processing
+opencv-python
+Pillow
 
 # Optional: if you use Jupyter for experiments
 Jupyter
