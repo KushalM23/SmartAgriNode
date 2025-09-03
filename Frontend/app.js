@@ -1,4 +1,52 @@
-// Show auth forms and hide home
+function setUserData(user) {
+    localStorage.setItem('userData', JSON.stringify(user));
+}
+
+function getUserData() {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData) : null;
+}
+
+function clearUserData() {
+    localStorage.removeItem('userData');
+}
+
+window.addEventListener('load', function() {
+    const user = getUserData();
+    if (user) {
+        loginUser(user);
+    }
+});
+
+function requireAuth(section) {
+    showAuthForms('login');
+    sessionStorage.setItem('redirectSection', section);
+}
+
+function showAlert(message, type = 'error') {
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    const alert = document.createElement('div');
+    alert.className = `custom-alert ${type}`;
+    alert.textContent = message;
+
+    document.body.appendChild(alert);
+    setTimeout(() => alert.classList.add('show'), 10);
+
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 400);
+    }, 3000);
+}
+
+function showHome() {
+    document.getElementById('auth-forms').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('home').style.display = 'block';
+}
+
 function showAuthForms(type) {
     document.getElementById('home').style.display = 'none';
     document.getElementById('auth-forms').style.display = 'block';
@@ -12,7 +60,6 @@ function showAuthForms(type) {
     }
 }
 
-// Function to toggle between login and signup forms
 function toggleForms() {
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
@@ -26,21 +73,52 @@ function toggleForms() {
     }
 }
 
-// Function to handle login
 document.querySelector('#login-form form').addEventListener('submit', function(e) {
     e.preventDefault();
-    document.getElementById('auth-forms').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    showDashboardSection('home');
+    const email = this.querySelector('input[type="email"]').value;
+    const password = this.querySelector('input[type="password"]').value;
+    
+
+    const user = getUserData();
+    if (user) {
+        if (user.email === email && user.password === password) {
+            loginUser(user);
+            showAlert('Login successful!', 'success');
+        } else {
+            showAlert('Invalid credentials', 'error');
+        }
+    } else {
+        showAlert('User not found. Please sign up.', 'error');
+    }
 });
 
-// Function to handle signup
 document.querySelector('#signup-form form').addEventListener('submit', function(e) {
     e.preventDefault();
+    const user = {
+        name: this.querySelector('input[placeholder="Full Name"]').value,
+        email: this.querySelector('input[type="email"]').value,
+        password: this.querySelector('input[type="password"]').value
+    };
+    
+    setUserData(user);
+    loginUser(user);
+    showAlert('Account created successfully!', 'success');
+});
+
+function loginUser(user) {
     document.getElementById('auth-forms').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    showDashboardSection('home');
-});
+    document.getElementById('user-name').textContent = user.name;
+
+    // Check if there's a redirect section stored
+    const redirectSection = sessionStorage.getItem('redirectSection');
+    if (redirectSection) {
+        showDashboardSection(redirectSection);
+        sessionStorage.removeItem('redirectSection');
+    } else {
+        showDashboardSection('home');
+    }
+}
 
 // Function to handle logout
 function logout() {
@@ -52,15 +130,21 @@ function logout() {
     document.getElementById('weed-form').reset();
     document.getElementById('preview-image').style.display = 'none';
     document.getElementById('upload-text').style.display = 'block';
+    // Clear user data
+    clearUserData();
+    document.getElementById('user-name').textContent = '';
 }
 
 // Function to show different dashboard sections
 function showDashboardSection(section) {
     // Update active nav link
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(section)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
     });
-    document.querySelector(`.nav-link[onclick*="${section}"]`)?.classList.add('active');
 
     // Hide all sections
     document.querySelectorAll('.dashboard-section').forEach(section => {
@@ -81,13 +165,13 @@ document.getElementById('crop-form').addEventListener('submit', function(e) {
     });
     
     const resultBox = document.getElementById('crop-result');
-    resultBox.innerHTML = 'Processing your request...';
-    resultBox.style.backgroundColor = '#fff3cd';
+    resultBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing soil conditions...';
+    resultBox.className = 'result-box processing show';
     
-    // Simulate processing (to be replaced with actual backend call)
+    // Simulate processing until backend is integrated
     setTimeout(() => {
-        resultBox.innerHTML = 'Recommendation will be processed when backend is implemented.';
-        resultBox.style.backgroundColor = '#d4edda';
+        resultBox.innerHTML = '<i class="fas fa-info-circle"></i> This feature will provide crop recommendations once the backend is integrated. Your soil parameters have been recorded.';
+        resultBox.className = 'result-box info show';
     }, 1500);
 });
 
@@ -117,12 +201,12 @@ document.getElementById('weed-form').addEventListener('submit', function(e) {
     }
     
     const resultBox = document.getElementById('weed-result');
-    resultBox.innerHTML = 'Processing your image...';
-    resultBox.style.backgroundColor = '#fff3cd';
+    resultBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing image for weed detection...';
+    resultBox.className = 'result-box processing show';
     
-    // Simulate processing (to be replaced with actual backend call)
+    // Simulate processing until backend is integrated
     setTimeout(() => {
-        resultBox.innerHTML = 'Weed detection will be processed when backend is implemented.';
-        resultBox.style.backgroundColor = '#d4edda';
+        resultBox.innerHTML = '<i class="fas fa-info-circle"></i> This feature will analyze your image for weed detection once the backend is integrated. Your image has been recorded.';
+        resultBox.className = 'result-box info show';
     }, 1500);
 });

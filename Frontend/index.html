@@ -8,21 +8,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Home Page -->
     <div id="home" class="home-container">
         <nav class="main-nav">
             <div class="logo">SmartAgriNode</div>
-            <div class="nav-buttons">
-                <button onclick="showAuthForms('login')" class="nav-btn">Login</button>
-                <button onclick="showAuthForms('signup')" class="nav-btn">Sign Up</button>
+            <div class="nav-links">
+                <a href="#" class="nav-link" onclick="requireAuth('crop')">Crop Recommendation</a>
+                <a href="#" class="nav-link" onclick="requireAuth('weed')">Weed Detection</a>
+                <div class="auth-buttons">
+                    <button onclick="showAuthForms('login')" class="nav-btn">Login</button>
+                    <button onclick="showAuthForms('signup')" class="nav-btn">Sign Up</button>
+                </div>
             </div>
         </nav>
         <div class="hero-section">
             <h1>Welcome to SmartAgriNode</h1>
-            <p>Revolutionizing agriculture with AI-powered crop recommendations and weed detection</p>
+            <p>Welcome to the future of smart agriculture. SmartAgriNode combines AI technology with agricultural expertise to revolutionize farming practices. Our advanced system provides precise crop recommendations based on soil conditions and environmental factors, while our image processing technology accurately detects and identifies weeds in your fields. Whether you're a small scale farmer or managing large agricultural operations, SmartAgriNode is your partner in maximizing yield and maintaining healthy crops sustainably.</p>
             <div class="hero-buttons">
                 <button onclick="showAuthForms('login')" class="cta-btn">Get Started</button>
-                <button class="learn-more-btn">Learn More</button>
             </div>
         </div>
         <div class="features-preview">
@@ -39,8 +41,8 @@
         </div>
     </div>
 
-    <!-- Auth Forms -->
     <div id="auth-forms" class="auth-container" style="display: none;">
+        <a href="#" onclick="showHome()" class="logo">SmartAgriNode</a>
         <div class="form-container" id="login-form">
             <h2>Login</h2>
             <form>
@@ -82,20 +84,27 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboard" class="dashboard" style="display: none;">
-        <nav class="nav-bar">
-            <div class="logo">SmartAgriNode</div>
+        <nav class="main-nav">
+            <div class="logo" onclick="showDashboardSection('home')">SmartAgriNode</div>
             <div class="nav-links">
-                <a href="#" class="nav-link active" onclick="showDashboardSection('home')">Home</a>
-                <a href="#" class="nav-link" onclick="showDashboardSection('crop')">Crop Recommendation</a>
-                <a href="#" class="nav-link" onclick="showDashboardSection('weed')">Weed Detection</a>
-                <button onclick="logout()" class="logout-btn">Logout</button>
+                <a href="#" class="nav-btn" onclick="showDashboardSection('crop')">Crop Recommendation</a>
+                <a href="#" class="nav-btn" onclick="showDashboardSection('weed')">Weed Detection</a>
+                <div class="profile-container">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="user-name" class="user-name"></span>
+                    </div>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
             </div>
         </nav>
 
         <div id="dashboard-home" class="dashboard-section">
-            <h1>Welcome to Your Dashboard</h1>
+            <div class="hero-section">
+                <h1>Welcome to SmartAgriNode</h1>
+                <p>Welcome to the future of smart agriculture. SmartAgriNode combines AI technology with agricultural expertise to revolutionize farming practices. Our advanced system provides precise crop recommendations based on soil conditions and environmental factors, while our image processing technology accurately detects and identifies weeds in your fields. Whether you're a small-scale farmer or managing large agricultural operations, SmartAgriNode is your partner in maximizing yield and maintaining healthy crops sustainably.</p>
+            </div>
             <div class="dashboard-cards">
                 <div class="dash-card" onclick="showDashboardSection('crop')">
                     <i class="fas fa-seedling"></i>
