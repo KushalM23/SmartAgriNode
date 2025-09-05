@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Ensure upload folder exists
@@ -44,16 +44,28 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Load ML models
+model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Models')
+
 try:
-    crop_model = joblib.load('Models/crop_recommendation_model.pkl')
-    print("✅ Crop recommendation model loaded successfully!")
+    crop_model_path = os.path.join(model_dir, 'crop_recommendation_model.pkl')
+    if os.path.exists(crop_model_path):
+        crop_model = joblib.load(crop_model_path)
+        print("✅ Crop recommendation model loaded successfully!")
+    else:
+        print("❌ Crop model file not found at:", crop_model_path)
+        crop_model = None
 except Exception as e:
     print(f"❌ Error loading crop model: {e}")
     crop_model = None
 
 try:
-    weed_model = YOLO('Models/weed_detection_model.pt')
-    print("✅ Weed detection model loaded successfully!")
+    weed_model_path = os.path.join(model_dir, 'weed_detection_model.pt')
+    if os.path.exists(weed_model_path):
+        weed_model = YOLO(weed_model_path)
+        print("✅ Weed detection model loaded successfully!")
+    else:
+        print("❌ Weed model file not found at:", weed_model_path)
+        weed_model = None
 except Exception as e:
     print(f"❌ Error loading weed model: {e}")
     weed_model = None
