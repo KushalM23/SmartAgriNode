@@ -30,7 +30,17 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-CORS(app, supports_credentials=True)
+# Allow credentialed requests from local React dev servers
+CORS(
+    app,
+    supports_credentials=True,
+    origins=[
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ]
+)
 
 # User model
 class User(UserMixin, db.Model):
