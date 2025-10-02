@@ -1,19 +1,13 @@
-# Core dependencies
+Flask
+Flask-Cors
+Flask-Login
+Flask-SQLAlchemy
+Werkzeug
+numpy
 pandas
 scikit-learn
 joblib
-Flask
-Flask-Cors
-Flask-SQLAlchemy
-Flask-Login
-Werkzeug
-
-# YOLOv8
-ultralytics  # YOLOv8 package
-
-# Image processing
 opencv-python
+ultralytics
+torch
 Pillow
-
-# Optional: if you use Jupyter for experiments
-Jupyter
