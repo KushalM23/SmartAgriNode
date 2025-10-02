@@ -64,7 +64,8 @@ export default function CropRecommendation() {
                   className="form-control"
                   placeholder="Enter nitrogen content"
                   min="0"
-                  step="1"
+                  max="200"
+                  step="0.1"
                   required
                 />
               </div>
@@ -79,7 +80,8 @@ export default function CropRecommendation() {
                   className="form-control"
                   placeholder="Enter phosphorous content"
                   min="0"
-                  step="1"
+                  max="150"
+                  step="0.1"
                   required
                 />
               </div>
@@ -96,7 +98,8 @@ export default function CropRecommendation() {
                   className="form-control"
                   placeholder="Enter potassium content"
                   min="0"
-                  step="1"
+                  max="200"
+                  step="0.1"
                   required
                 />
               </div>
@@ -110,7 +113,9 @@ export default function CropRecommendation() {
                   onChange={handleChange}
                   className="form-control"
                   placeholder="Enter temperature"
-                  step="0.01"
+                  step="0.1"
+                  min="5"
+                  max="40"
                   required
                 />
               </div>
@@ -128,7 +133,7 @@ export default function CropRecommendation() {
                   placeholder="Enter humidity"
                   min="0"
                   max="100"
-                  step="0.01"
+                  step="0.1"
                   required
                 />
               </div>
@@ -142,9 +147,9 @@ export default function CropRecommendation() {
                   onChange={handleChange}
                   className="form-control"
                   placeholder="Enter pH level"
-                  step="0.01"
-                  min="0"
-                  max="14"
+                  step="0.1"
+                  min="4"
+                  max="10"
                   required
                 />
               </div>
@@ -160,8 +165,9 @@ export default function CropRecommendation() {
                   onChange={handleChange}
                   className="form-control"
                   placeholder="Enter rainfall"
-                  min="0"
-                  step="0.01"
+                  min="20"
+                  max="5000"
+                  step="0.1"
                   required
                 />
               </div>
