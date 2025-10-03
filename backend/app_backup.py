@@ -1,25 +1,28 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+import pickle
 import joblib
 import numpy as np
 from ultralytics import YOLO
 import cv2
+from PIL import Image
+import io
 import base64
+import tempfile
 
 app = Flask(__name__)
-
-# Configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///users.db')
+app.config['SECRET_KEY'] = 'your-secret-key-here'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = '/tmp/uploads' if os.environ.get('RENDER') else os.path.join(os.path.dirname(__file__), 'uploads')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize extensions
@@ -27,13 +30,16 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
-# CORS configuration for production
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+# Allow credentialed requests from local React dev servers
 CORS(
     app,
     supports_credentials=True,
-    origins=[FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000']
+    origins=[
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ]
 )
 
 # User model
@@ -48,60 +54,32 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Load ML models
-# Get the project root directory (parent of backend/)
-backend_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(backend_dir)
-model_dir = os.path.join(project_root, 'Models')
+model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Models')
 
-print("=" * 60)
-print(f"📂 Backend directory: {backend_dir}")
-print(f"📂 Project root: {project_root}")
-print(f"📂 Model directory: {model_dir}")
-print(f"✓ Model directory exists: {os.path.exists(model_dir)}")
-
-if os.path.exists(model_dir):
-    print(f"📁 Files in Models/: {os.listdir(model_dir)}")
-print("=" * 60)
-
-# Load Crop Recommendation Model
 try:
     crop_model_path = os.path.join(model_dir, 'crop_recommendation_model.pkl')
-    print(f"🔍 Looking for crop model at: {crop_model_path}")
-    
     if os.path.exists(crop_model_path):
         crop_model = joblib.load(crop_model_path)
         print("✅ Crop recommendation model loaded successfully!")
     else:
+        print("❌ Crop model file not found at:", crop_model_path)
         crop_model = None
-        print(f"❌ Crop model not found at: {crop_model_path}")
-        
 except Exception as e:
     print(f"❌ Error loading crop model: {e}")
-    import traceback
-    traceback.print_exc()
     crop_model = None
 
-# Load Weed Detection Model
 try:
     weed_model_path = os.path.join(model_dir, 'weed_detection_model.pt')
-    print(f"🔍 Looking for weed model at: {weed_model_path}")
-    
     if os.path.exists(weed_model_path):
         weed_model = YOLO(weed_model_path)
         print("✅ Weed detection model loaded successfully!")
     else:
+        print("❌ Weed model file not found at:", weed_model_path)
         weed_model = None
-        print(f"❌ Weed model not found at: {weed_model_path}")
-        
 except Exception as e:
     print(f"❌ Error loading weed model: {e}")
-    import traceback
-    traceback.print_exc()
     weed_model = None
 
-print("=" * 60)
-
-# Routes
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -182,7 +160,7 @@ def crop_recommendation():
         
         return jsonify({
             'recommended_crop': prediction,
-            'confidence': 0.95
+            'confidence': 0.95  # Mock confidence score
         })
     
     except Exception as e:
@@ -247,11 +225,7 @@ def health_check():
         'models_loaded': crop_model is not None and weed_model is not None
     })
 
-@app.route('/')
-def home():
-    return jsonify({'message': 'SmartAgriNode API is running'})
-
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
