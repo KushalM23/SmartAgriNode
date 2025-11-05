@@ -8,45 +8,32 @@ import subprocess
 import sys
 import time
 import os
-import signal
 from threading import Thread
 import shutil
 
 backend_process = None
-frontend_process = None
 react_process = None
 
 # Resolve absolute paths once
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(PROJECT_ROOT, 'backend')
-LEGACY_FRONTEND_DIR = os.path.join(PROJECT_ROOT, 'Frontend')
 REACT_DIR = os.path.join(PROJECT_ROOT, 'frontend-react')
 
 def start_backend():
-    """Start the backend Flask server"""
+    """Start the backend FastAPI server"""
     global backend_process
-    print("🚀 Starting Backend Server...")
+    print("🚀 Starting Backend Server (FastAPI)...")
     try:
-        # Start the backend in a subprocess and keep it running
-        backend_process = subprocess.Popen([sys.executable, 'app.py'], cwd=BACKEND_DIR)
+        # Start the backend with uvicorn
+        backend_process = subprocess.Popen(
+            [sys.executable, '-m', 'uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '5000', '--reload'],
+            cwd=BACKEND_DIR
+        )
         backend_process.wait()
     except KeyboardInterrupt:
         print("\n⏹️ Backend server stopped")
     except Exception as e:
         print(f"❌ Backend server error: {e}")
-
-def start_frontend():
-    """Start the frontend static server"""
-    global frontend_process
-    print("🌐 Starting Frontend Server...")
-    try:
-        # Start frontend in a subprocess
-        frontend_process = subprocess.Popen([sys.executable, "-m", "http.server", "3000"], cwd=LEGACY_FRONTEND_DIR)
-        frontend_process.wait()
-    except KeyboardInterrupt:
-        print("\n🛑 Frontend server stopped")
-    except Exception as e:
-        print(f"❌ Frontend server error: {e}")
 
 def start_react_frontend():
     """Start the React (Vite) development server"""
@@ -112,11 +99,9 @@ def start_react_frontend():
 
 def stop_servers():
     """Kill backend and frontend processes"""
-    global backend_process, frontend_process, react_process
+    global backend_process, react_process
     if backend_process:
         backend_process.terminate()
-    if frontend_process:
-        frontend_process.terminate()
     if react_process:
         react_process.terminate()
 
