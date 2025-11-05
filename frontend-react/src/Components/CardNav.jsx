@@ -1,32 +1,26 @@
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
-import { GoArrowUpRight } from 'react-icons/go';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './CardNav.css';
 
 const CardNav = ({
-  logo,
-  logoAlt = 'Logo',
   items,
   className = '',
   ease = 'power3.out',
   baseColor = '#fff',
   menuColor,
-  buttonBgColor,
-  buttonTextColor,
   rightSlot
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // Dropdown is not used; removed to avoid unused state
   
   // Close menu when route changes
   useEffect(() => {
     setIsExpanded(false);
     setIsHamburgerOpen(false);
-    setIsDropdownOpen(false);
   }, [location.pathname]);
   const navRef = useRef(null);
   const cardsRef = useRef([]);
@@ -67,7 +61,7 @@ const CardNav = ({
     return 200;
   };
 
-  const createTimeline = () => {
+  const createTimeline = useCallback(() => {
     const navEl = navRef.current;
     if (!navEl) return null;
 
@@ -85,7 +79,7 @@ const CardNav = ({
     tl.to(cardsRef.current, { y: 0, opacity: 1, duration: 0.4, ease, stagger: 0.08 }, '-=0.1');
 
     return tl;
-  };
+  }, [ease, items]);
 
   useLayoutEffect(() => {
     const tl = createTimeline();
@@ -95,7 +89,7 @@ const CardNav = ({
       tl?.kill();
       tlRef.current = null;
     };
-  }, [ease, items]);
+  }, [ease, items, createTimeline]);
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -122,7 +116,7 @@ const CardNav = ({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [isExpanded]);
+  }, [isExpanded, createTimeline]);
 
   const toggleMenu = () => {
     const tl = tlRef.current;

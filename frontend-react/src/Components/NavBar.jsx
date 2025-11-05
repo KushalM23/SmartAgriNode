@@ -1,12 +1,20 @@
 import CardNav from './CardNav';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useUser, useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
 import "./NavBar.css"
 
-export default function NavBar({ user, onLogout }) {
+export default function NavBar() {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const [hoverLogout, setHoverLogout] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   const items = [
     {
       label: "Dashboard",
@@ -36,32 +44,33 @@ export default function NavBar({ user, onLogout }) {
       items={items}
       baseColor="#fff"
       menuColor="#E01709"
-      buttonBgColor="#E01709"
-      buttonTextColor="#fff"
       ease="power3.out"
       rightSlot={
-        user ? (
-          <div className="user-menu">
+        <>
+          <SignedIn>
+            <div className="user-menu">
+              <button
+                type="button"
+                className={`user-button ${hoverLogout ? 'danger' : ''}`}
+                onClick={handleLogout}
+                onMouseEnter={() => setHoverLogout(true)}
+                onMouseLeave={() => setHoverLogout(false)}
+                title={hoverLogout ? 'Click to logout' : `Logged in as ${user?.username || user?.firstName || 'User'}`}
+              >
+                {hoverLogout ? 'Logout' : (user?.username || user?.firstName || 'User')}
+              </button>
+            </div>
+          </SignedIn>
+          <SignedOut>
             <button
               type="button"
-              className={`user-button ${hoverLogout ? 'danger' : ''}`}
-              onClick={onLogout}
-              onMouseEnter={() => setHoverLogout(true)}
-              onMouseLeave={() => setHoverLogout(false)}
-              title={hoverLogout ? 'Click to logout' : `Logged in as ${user.username}`}
+              className="card-nav-cta-button"
+              onClick={() => navigate('/auth')}
             >
-              {hoverLogout ? 'Logout' : user.username}
+              Sign In
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="card-nav-cta-button"
-            onClick={() => navigate('/auth')}
-          >
-            Account
-          </button>
-        )
+          </SignedOut>
+        </>
       }
     />
   )

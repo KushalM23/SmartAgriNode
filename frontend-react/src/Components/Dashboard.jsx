@@ -134,7 +134,7 @@ export default function Dashboard() {
             fontSize: '24px',
             color: '#E01709',
             offsetY: -20,
-            formatter: function(val) {
+            formatter: function() {
               return farmData.temperature.toFixed(1) + '°C';
             }
           }
@@ -284,7 +284,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function(val) {
+                            formatter: function() {
                               return farmData.humidity + '%';
                             }
                           }
@@ -313,7 +313,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function(val) {
+                            formatter: function() {
                               return farmData.rainfall + ' mm';
                             }
                           }

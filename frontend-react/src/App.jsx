@@ -1,64 +1,63 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import NavBar from "./Components/NavBar";
-import Home from "./Components/Home";
-import Dashboard from "./Components/Dashboard";
-import CropRecommendation from "./Components/CropRecommendation";
-import WeedDetection from "./Components/WeedDetection";
-import Login from "./Components/Login";
-import Signup from "./Components/Signup";
-import AuthTabs from "./Components/AuthTabs";
-import ProtectedRoute from "./Components/ProtectedRoute";
-import { api } from './lib/api';
+const Home = lazy(() => import('./Components/Home'));
+const Dashboard = lazy(() => import('./Components/Dashboard'));
+const CropRecommendation = lazy(() => import('./Components/CropRecommendation'));
+const WeedDetection = lazy(() => import('./Components/WeedDetection'));
+const AuthPage = lazy(() => import('./Components/AuthPage'));
 import './App.css';
 
-export default function App() {
-  const [currentUser, setCurrentUser] = useState(null);
+// Get Clerk publishable key from environment
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const user = await api.getUser();
-        if (mounted && !user.error) setCurrentUser(user);
-      } catch (_) {}
-    })();
-    return () => { mounted = false };
-  }, []);
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error("Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your .env file");
+}
 
-  const handleLogout = async () => {
-    try { await api.logout(); } catch (_) {}
-    setCurrentUser(null);
-  };
-
+function ProtectedRoute({ children }) {
   return (
-    <BrowserRouter>
-      <div className="app">
-        <NavBar user={currentUser} onLogout={handleLogout} />
-        <div className="content-wrapper">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute user={currentUser}>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/crop-recommendation" element={
-              <ProtectedRoute user={currentUser}>
-                <CropRecommendation />
-              </ProtectedRoute>
-            } />
-            <Route path="/weed-detection" element={
-              <ProtectedRoute user={currentUser}>
-                <WeedDetection />
-              </ProtectedRoute>
-            } />
-            <Route path="/login" element={<AuthTabs onAuthed={setCurrentUser} defaultTab="login" />} />
-            <Route path="/signup" element={<AuthTabs onAuthed={setCurrentUser} defaultTab="signup" />} />
-            <Route path="/auth" element={<AuthTabs onAuthed={setCurrentUser} />} />
-          </Routes>
+    <>
+      <SignedIn>{children}</SignedIn>
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+      <BrowserRouter>
+        <div className="app">
+          <NavBar />
+          <div className="content-wrapper">
+            <Suspense fallback={<div style={{padding: 24}}>Loading…</div>}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/auth/*" element={<AuthPage />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/crop-recommendation" element={
+                  <ProtectedRoute>
+                    <CropRecommendation />
+                  </ProtectedRoute>
+                } />
+                <Route path="/weed-detection" element={
+                  <ProtectedRoute>
+                    <WeedDetection />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </Suspense>
+          </div>
         </div>
-      </div>
-    </BrowserRouter>
+      </BrowserRouter>
+    </ClerkProvider>
   );
 }
