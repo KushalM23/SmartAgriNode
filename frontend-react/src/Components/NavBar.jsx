@@ -65,7 +65,7 @@ export default function NavBar() {
             <button
               type="button"
               className="card-nav-cta-button"
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/sign-in')}
             >
               Sign In
             </button>

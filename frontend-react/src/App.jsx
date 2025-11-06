@@ -6,7 +6,8 @@ const Home = lazy(() => import('./Components/Home'));
 const Dashboard = lazy(() => import('./Components/Dashboard'));
 const CropRecommendation = lazy(() => import('./Components/CropRecommendation'));
 const WeedDetection = lazy(() => import('./Components/WeedDetection'));
-const AuthPage = lazy(() => import('./Components/AuthPage'));
+const SignInPage = lazy(() => import('./Components/SignInPage'));
+const SignUpPage = lazy(() => import('./Components/SignUpPage'));
 import './App.css';
 
 // Get Clerk publishable key from environment
@@ -21,7 +22,7 @@ function ProtectedRoute({ children }) {
     <>
       <SignedIn>{children}</SignedIn>
       <SignedOut>
-        <RedirectToSignIn />
+        <RedirectToSignIn signInUrl="/sign-in" />
       </SignedOut>
     </>
   );
@@ -46,7 +47,8 @@ export default function App() {
             <Suspense fallback={<div style={{padding: 24}}>Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/auth/*" element={<AuthPage />} />
+                <Route path="/sign-in/*" element={<SignInPage />} />
+                <Route path="/sign-up/*" element={<SignUpPage />} />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />

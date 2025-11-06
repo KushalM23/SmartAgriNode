@@ -1,0 +1,84 @@
+.auth-page {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: linear-gradient(135deg, rgba(224, 23, 9, 0.05), rgba(17, 105, 0, 0.05));
+}
+
+.clerk-auth-root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.clerk-auth-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(16, 24, 40, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.clerk-auth-title {
+  font-size: 1.75rem;
+  color: #101828;
+}
+
+.clerk-auth-subtitle {
+  color: #475467;
+}
+
+.clerk-auth-label {
+  color: #344054;
+  font-weight: 500;
+}
+
+.clerk-auth-input {
+  border-radius: 10px;
+  border: 1px solid #d0d5dd;
+  padding: 0.75rem;
+  transition: border-color 0.2s ease;
+}
+
+.clerk-auth-input:focus {
+  border-color: #e01709;
+  box-shadow: 0 0 0 3px rgba(224, 23, 9, 0.15);
+}
+
+.clerk-auth-primary-button {
+  background: linear-gradient(135deg, #e01709, #f44336);
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(224, 23, 9, 0.3);
+}
+
+.clerk-auth-primary-button:hover {
+  background: linear-gradient(135deg, #c81408, #e53935);
+}
+
+.clerk-auth-social-button {
+  border-radius: 12px;
+  border: 1px solid #d0d5dd;
+}
+
+.clerk-auth-footer-text {
+  color: #475467;
+}
+
+.clerk-auth-footer-link {
+  color: #e01709;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .auth-page {
+    padding: 2rem 1rem;
+  }
+
+  .clerk-auth-card {
+    border-radius: 12px;
+    box-shadow: 0 16px 32px rgba(16, 24, 40, 0.1);
+  }
+}
