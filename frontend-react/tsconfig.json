@@ -13,8 +13,6 @@
     "noEmit": true
   },
   "include": [
-    "src",
-    "tests",
-    "playwright.config.ts"
+    "src"
   ]
 }

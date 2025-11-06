@@ -1,7 +1,7 @@
 import CardNav from './CardNav';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useUser, useClerk, SignedIn, SignedOut } from '../lib/clerk';
+import { useUser, useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
 import "./NavBar.css"
 
 export default function NavBar() {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../lib/clerk';
+import { useAuth } from '@clerk/clerk-react';
 import { api } from '../lib/api';
 import './CropRecommendation.css';
 

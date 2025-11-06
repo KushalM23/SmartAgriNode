@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useAuth } from '../lib/clerk';
+import { useAuth } from '@clerk/clerk-react';
 import { api } from '../lib/api';
 import './WeedDetection.css';
 
@@ -78,5 +78,5 @@ export default function WeedDetection() {
         {/* Guidelines removed per request */}
       </div>
     </div>
-  );;
+  );
 }

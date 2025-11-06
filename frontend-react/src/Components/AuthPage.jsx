@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, SignIn, SignUp } from '../lib/clerk';
+import { SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react';
 import { useSearchParams } from 'react-router-dom';
 import './Auth.css';
 
