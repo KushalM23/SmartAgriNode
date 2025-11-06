@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from 'react';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, isMockClerk } from './lib/clerk';
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, isMockClerk } from './lib/clerk.js';
 import NavBar from "./Components/NavBar";
 const Home = lazy(() => import('./Components/Home'));
 const Dashboard = lazy(() => import('./Components/Dashboard'));
