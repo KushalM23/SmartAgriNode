@@ -3,19 +3,27 @@ SmartAgriNode FastAPI Backend
 AI-powered agriculture dashboard with crop recommendation and weed detection
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Header
+import base64
+import logging
+import os
+import tempfile
+from typing import Optional
+
+import cv2
+import joblib
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import Optional
-import os
-import joblib
 from ultralytics import YOLO
-import cv2
-import base64
-import tempfile
-from dotenv import load_dotenv
+
 from database import SupabaseDB
+
+logger = logging.getLogger("SmartAgriNode.backend")
+
+if not logging.getLogger().handlers:
+    logging.basicConfig(level=logging.INFO)
 
 # Load environment variables
 load_dotenv()
@@ -23,7 +31,7 @@ load_dotenv()
 # Initialize FastAPI app
 app = FastAPI(
     title="SmartAgriNode API",
-    description="AI-powered agriculture dashboard for crop recommendation and weed detection",
+    description="AI-powered agriculture dashboard with crop recommendation and weed detection",
     version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -63,9 +71,9 @@ def get_crop_model():
     if crop_model is None and os.path.exists(crop_model_path):
         try:
             crop_model = joblib.load(crop_model_path)
-            print("✅ Crop recommendation model loaded successfully!")
-        except Exception as e:
-            print(f"❌ Error loading crop model: {e}")
+            logger.info("Crop recommendation model loaded successfully")
+        except Exception:
+            logger.exception("Error loading crop recommendation model")
             crop_model = None
     return crop_model
 
@@ -74,9 +82,9 @@ def get_weed_model():
     if weed_model is None and os.path.exists(weed_model_path):
         try:
             weed_model = YOLO(weed_model_path)
-            print("✅ Weed detection model loaded successfully!")
-        except Exception as e:
-            print(f"❌ Error loading weed model: {e}")
+            logger.info("Weed detection model loaded successfully")
+        except Exception:
+            logger.exception("Error loading weed detection model")
             weed_model = None
     return weed_model
 
@@ -159,8 +167,8 @@ async def verify_clerk_token(authorization: Optional[str] = Header(None)) -> dic
         # Decode JWT without verification for development
         # This allows testing without network calls to Clerk's API
         decoded = jwt.decode(token, options={"verify_signature": False})
-        
-        print(f"✅ Token decoded successfully for user: {decoded.get('sub', 'unknown')}")
+
+        logger.info("Token decoded for user %s", decoded.get("sub", "unknown"))
         return {
             "user_id": decoded.get("sub"),
             "session_id": decoded.get("sid"),
@@ -169,10 +177,10 @@ async def verify_clerk_token(authorization: Optional[str] = Header(None)) -> dic
         
     except jwt.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token format")
-    except Exception as e:
-        print(f"❌ Token verification error: {str(e)}")
+    except Exception:
+        logger.exception("Token verification error")
         # In development, allow requests even if token verification fails
-        print("⚠️ Development mode: Allowing request despite token error")
+        logger.warning("Development mode: Allowing request despite token error")
         return {"user_id": "dev_user", "email": "dev@example.com"}
 
 # API Routes
@@ -246,8 +254,8 @@ async def crop_recommendation(
                 user_id=user.get("user_id") or "dev_user",
                 email=user.get("email") or "dev@example.com"
             )
-        except Exception as e:
-            print(f"Warning: Failed to upsert user metadata: {e}")
+        except Exception:
+            logger.warning("Failed to upsert user metadata", exc_info=True)
 
         # Extract features in the correct order
         features = [
@@ -271,8 +279,8 @@ async def crop_recommendation(
                 recommendation=str(prediction),
                 confidence=0.95
             )
-        except Exception as e:
-            print(f"Warning: Failed to store crop recommendation history: {e}")
+        except Exception:
+            logger.warning("Failed to store crop recommendation history", exc_info=True)
         
         return CropRecommendationResponse(
             recommended_crop=str(prediction),
@@ -323,8 +331,8 @@ async def weed_detection(
                 user_id=user.get("user_id") or "dev_user",
                 email=user.get("email") or "dev@example.com"
             )
-        except Exception as e:
-            print(f"Warning: Failed to upsert user metadata: {e}")
+        except Exception:
+            logger.warning("Failed to upsert user metadata", exc_info=True)
 
         # Save uploaded image temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
@@ -358,8 +366,8 @@ async def weed_detection(
                 filename=image.filename,
                 detections=detection_count
             )
-        except Exception as e:
-            print(f"Warning: Failed to store weed detection history: {e}")
+        except Exception:
+            logger.warning("Failed to store weed detection history", exc_info=True)
         
         # Clean up temporary files
         os.remove(tmp_path)

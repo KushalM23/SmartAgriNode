@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
+import { useAuth } from '../lib/clerk';
 import { api } from '../lib/api';
 import './WeedDetection.css';
 
 export default function WeedDetection() {
+  const { getToken } = useAuth();
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -25,7 +27,8 @@ export default function WeedDetection() {
     setLoading(true);
     setError('');
     try {
-      const res = await api.weedDetection(selectedFile);
+      const token = await getToken();
+      const res = await api.weedDetection(selectedFile, token);
       setResult(res);
     } catch (err) {
       setError(err.message || 'Detection failed');

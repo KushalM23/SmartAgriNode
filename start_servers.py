@@ -4,12 +4,13 @@ SmartAgriNode Server Startup Script
 This script starts both the backend API server and the frontend web server.
 """
 
+import logging
+import os
+import shutil
 import subprocess
 import sys
 import time
-import os
 from threading import Thread
-import shutil
 
 backend_process = None
 react_process = None
@@ -19,10 +20,14 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(PROJECT_ROOT, 'backend')
 REACT_DIR = os.path.join(PROJECT_ROOT, 'frontend-react')
 
+
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+logger = logging.getLogger("SmartAgriNode.start_servers")
+
 def start_backend():
     """Start the backend FastAPI server"""
     global backend_process
-    print("🚀 Starting Backend Server (FastAPI)...")
+    logger.info("🚀 Starting Backend Server (FastAPI)...")
     try:
         # Start the backend with uvicorn
         backend_process = subprocess.Popen(
@@ -31,14 +36,14 @@ def start_backend():
         )
         backend_process.wait()
     except KeyboardInterrupt:
-        print("\n⏹️ Backend server stopped")
-    except Exception as e:
-        print(f"❌ Backend server error: {e}")
+        logger.info("⏹️ Backend server stopped")
+    except Exception:
+        logger.exception("❌ Backend server error")
 
 def start_react_frontend():
     """Start the React (Vite) development server"""
     global react_process
-    print("🌐 Starting React Frontend (Vite) Server...")
+    logger.info("🌐 Starting React Frontend (Vite) Server...")
     try:
         # Resolve npm/npx paths (Windows uses .cmd shims)
         npm_exe = 'npm.cmd' if os.name == 'nt' else 'npm'
@@ -47,17 +52,17 @@ def start_react_frontend():
         npx_path = shutil.which(npx_exe) or shutil.which('npx')
 
         if not npm_path:
-            print("❌ npm not found in PATH for this process. Make sure Node.js is installed and restart the terminal/IDE.")
-            print("   You can also add it manually to PATH or run once:")
-            print("   C:\\Program Files\\nodejs\\npm.cmd --version")
+            logger.error("❌ npm not found in PATH for this process. Make sure Node.js is installed and restart the terminal/IDE.")
+            logger.info("   You can also add it manually to PATH or run once:")
+            logger.info("   C:\\Program Files\\nodejs\\npm.cmd --version")
             return
         else:
             subprocess.run([npm_path, "--version"], check=True, capture_output=True)
-            print("✅ npm found, starting Vite dev server...")
+            logger.info("✅ npm found, starting Vite dev server...")
         
         # Install dependencies if node_modules doesn't exist
         if not os.path.exists(os.path.join(REACT_DIR, 'node_modules')):
-            print("📦 Installing React dependencies...")
+            logger.info("📦 Installing React dependencies...")
             subprocess.run([npm_path, "install"], check=True, cwd=REACT_DIR)
         
         # Start Vite dev server with proper Windows handling
@@ -74,9 +79,9 @@ def start_react_frontend():
                 react_process = subprocess.Popen(cmd, cwd=REACT_DIR, shell=False)
         except Exception:
             # Fallback to npx vite
-            print("↩️ Falling back to npx vite --host")
+            logger.warning("↩️ Falling back to npx vite --host")
             if not npx_path:
-                print("❌ npx not found. Please ensure Node.js installation is complete and restart your terminal.")
+                logger.error("❌ npx not found. Please ensure Node.js installation is complete and restart your terminal.")
                 return
             fallback_cmd = [npx_path, "vite", "--host"]
             if os.name == 'nt':
@@ -89,25 +94,27 @@ def start_react_frontend():
             else:
                 react_process = subprocess.Popen(fallback_cmd, cwd=REACT_DIR, shell=False)
         
-        print("🌐 React dev server starting at http://localhost:5173")
+        logger.info("🌐 React dev server starting at http://localhost:5173")
         react_process.wait()
     except KeyboardInterrupt:
-        print("\n🛑 React frontend server stopped")
-    except Exception as e:
-        print(f"❌ React frontend server error: {e}")
-        print("   Make sure Node.js and npm are installed and in your PATH")
+        logger.info("🛑 React frontend server stopped")
+    except Exception:
+        logger.exception("❌ React frontend server error")
+        logger.info("   Make sure Node.js and npm are installed and in your PATH")
 
 def stop_servers():
     """Kill backend and frontend processes"""
     global backend_process, react_process
     if backend_process:
         backend_process.terminate()
+        logger.info("Backend process terminated")
     if react_process:
         react_process.terminate()
+        logger.info("React process terminated")
 
 def main():
-    print("🌱 SmartAgriNode - Starting Servers...")
-    print("=" * 50)
+    logger.info("🌱 SmartAgriNode - Starting Servers...")
+    logger.info("=" * 50)
     
     # Start backend in a separate thread
     backend_thread = Thread(target=start_backend)
@@ -120,7 +127,7 @@ def main():
         # Prefer starting the React app
         start_react_frontend()
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down servers...")
+        logger.info("🛑 Shutting down servers...")
         stop_servers()
         sys.exit(0)
 

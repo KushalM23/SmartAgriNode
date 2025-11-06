@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, useEffect, useCallback } from 'react
 import { gsap } from 'gsap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './CardNav.css';
-
+ 
 const CardNav = ({
   items,
   className = '',

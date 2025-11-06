@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from 'react';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn, isMockClerk } from './lib/clerk';
 import NavBar from "./Components/NavBar";
 const Home = lazy(() => import('./Components/Home'));
 const Dashboard = lazy(() => import('./Components/Dashboard'));
@@ -12,8 +12,8 @@ import './App.css';
 // Get Clerk publishable key from environment
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-if (!CLERK_PUBLISHABLE_KEY) {
-  console.error("Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your .env file");
+if (!CLERK_PUBLISHABLE_KEY && !isMockClerk) {
+  console.error('Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your .env file');
 }
 
 function ProtectedRoute({ children }) {
@@ -29,7 +29,7 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+  <ClerkProvider publishableKey={isMockClerk ? undefined : CLERK_PUBLISHABLE_KEY}>
       <BrowserRouter>
         <div className="app">
           <NavBar />

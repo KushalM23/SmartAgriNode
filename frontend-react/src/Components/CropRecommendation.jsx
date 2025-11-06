@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useAuth } from '../lib/clerk';
 import { api } from '../lib/api';
 import './CropRecommendation.css';
 
 export default function CropRecommendation() {
+  const { getToken } = useAuth();
   const [formData, setFormData] = useState({
     N: '',
     P: '',
@@ -29,6 +31,7 @@ export default function CropRecommendation() {
     setError('');
     setLoading(true);
     try {
+      const token = await getToken();
       const payload = {
         N: parseFloat(formData.N),
         P: parseFloat(formData.P),
@@ -38,7 +41,7 @@ export default function CropRecommendation() {
         ph: parseFloat(formData.ph),
         rainfall: parseFloat(formData.rainfall)
       };
-      const res = await api.cropRecommendation(payload);
+      const res = await api.cropRecommendation(payload, token);
       setResult(res);
     } catch (err) {
       setError(err.message || 'Prediction failed');

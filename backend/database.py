@@ -3,10 +3,12 @@ Supabase Database Integration
 Handles user data storage and retrieval
 """
 
+import logging
 import os
-from supabase import create_client, Client
+from typing import Any, Dict, Optional
+
 from dotenv import load_dotenv
-from typing import Optional, Dict, Any
+from supabase import Client, create_client
 
 load_dotenv()
 
@@ -17,15 +19,17 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 # Initialize Supabase client
 supabase: Optional[Client] = None
 
+logger = logging.getLogger("SmartAgriNode.database")
+
 if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
     try:
         # Use SERVICE_ROLE_KEY to bypass RLS since we're using Clerk auth
         supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-        print("✅ Supabase client initialized successfully!")
-    except Exception as e:
-        print(f"❌ Error initializing Supabase client: {e}")
+        logger.info("Supabase client initialized")
+    except Exception:  # pragma: no cover - configuration issue
+        logger.exception("Failed to initialize Supabase client")
 else:
-    print("⚠️ Warning: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set")
+    logger.warning("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set")
 
 class SupabaseDB:
     """Supabase database operations"""
@@ -34,7 +38,7 @@ class SupabaseDB:
     def get_client() -> Client:
         """Get Supabase client instance"""
         if not supabase:
-            raise Exception("Supabase client not initialized. Check environment variables.")
+            raise RuntimeError("Supabase client not initialized. Check environment variables.")
         return supabase
     
     @staticmethod
@@ -51,7 +55,7 @@ class SupabaseDB:
             User record
         """
         if not supabase:
-            print("⚠️ Supabase not configured, skipping user metadata storage")
+            logger.warning("Supabase not configured, skipping user metadata storage")
             return {"user_id": user_id, "email": email}
         
         try:
@@ -64,8 +68,8 @@ class SupabaseDB:
             # Upsert user metadata
             result = supabase.table("users").upsert(data, on_conflict="clerk_user_id").execute()
             return result.data[0] if result.data else data
-        except Exception as e:
-            print(f"Error storing user metadata: {e}")
+        except Exception:
+            logger.exception("Error storing user metadata")
             return {"user_id": user_id, "email": email}
     
     @staticmethod
@@ -85,8 +89,8 @@ class SupabaseDB:
         try:
             result = supabase.table("users").select("*").eq("clerk_user_id", user_id).execute()
             return result.data[0] if result.data else None
-        except Exception as e:
-            print(f"Error fetching user: {e}")
+        except Exception:
+            logger.exception("Error fetching user")
             return None
     
     @staticmethod
@@ -109,7 +113,7 @@ class SupabaseDB:
             Stored record
         """
         if not supabase:
-            print("⚠️ Supabase not configured, skipping history storage")
+            logger.warning("Supabase not configured, skipping history storage")
             return {}
         
         try:
@@ -120,16 +124,10 @@ class SupabaseDB:
                 "confidence": confidence
             }
             
-            print(f"📝 Storing crop recommendation for user: {user_id}")
-            print(f"   Data: {data}")
-            
             result = supabase.table("crop_recommendations").insert(data).execute()
-            print(f"✅ Successfully stored crop recommendation!")
             return result.data[0] if result.data else {}
-        except Exception as e:
-            print(f"❌ Error storing crop recommendation: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            logger.exception("Error storing crop recommendation")
             return {}
     
     @staticmethod
@@ -150,7 +148,7 @@ class SupabaseDB:
             Stored record
         """
         if not supabase:
-            print("⚠️ Supabase not configured, skipping history storage")
+            logger.warning("Supabase not configured, skipping history storage")
             return {}
         
         try:
@@ -160,16 +158,10 @@ class SupabaseDB:
                 "weed_count": detections
             }
             
-            print(f"📝 Storing weed detection for user: {user_id}")
-            print(f"   Data: {data}")
-            
             result = supabase.table("weed_detections").insert(data).execute()
-            print(f"✅ Successfully stored weed detection!")
             return result.data[0] if result.data else {}
-        except Exception as e:
-            print(f"❌ Error storing weed detection: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            logger.exception("Error storing weed detection")
             return {}
     
     @staticmethod
@@ -206,6 +198,6 @@ class SupabaseDB:
                 "crop_recommendations": crop_recs.data or [],
                 "weed_detections": weed_dets.data or []
             }
-        except Exception as e:
-            print(f"Error fetching user history: {e}")
+        except Exception:
+            logger.exception("Error fetching user history")
             return {"crop_recommendations": [], "weed_detections": []}

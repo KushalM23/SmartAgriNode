@@ -7,9 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "cross-env PWDEBUG=1 playwright test",
+  "test:critical": "playwright test --config=playwright.config.ts --project=critical",
+  "test:visual": "playwright test tests/visual --config=playwright.config.ts --project=visual",
+    "test:performance": "node tests/performance/run-lighthouse.mjs"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.53.6",
     "apexcharts": "^5.3.5",
     "gsap": "^3.13.0",
     "react": "^19.1.1",
@@ -19,14 +25,19 @@
     "react-router-dom": "^7.9.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "playwright-lighthouse": "^4.0.0",
     "vite": "npm:rolldown-vite@7.1.12"
   },
   "overrides": {

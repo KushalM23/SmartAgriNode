@@ -4,21 +4,25 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 
 ## Features
 
-- **User Authentication**: Secure login/signup system with session management
+- **User Authentication**: Secure authentication with Clerk (OAuth, social login, magic links)
 - **Crop Recommendation**: AI-powered crop suggestions based on soil and environmental parameters
 - **Weed Detection**: Advanced image processing to identify weeds in agricultural images
-- **Dashboard**: A web dashboard for viewing all the insights about the soil and climate conditions.
+- **Dashboard**: A web dashboard for viewing all the insights about the soil and climate conditions
+- **User History**: Automatic tracking of recommendations and detections (stored in Supabase)
 
 ## Technology Stack
 
 ### Backend
-- **Framework:** Flask, Flask-SQLAlchemy, Flask-Login, Flask-CORS  
-- **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch  
-- **Database:** SQLite, local model files in `Models/`
+- **Framework:** FastAPI (async Python web framework)
+- **Authentication:** Clerk (JWT-based authentication)
+- **Database:** Supabase (PostgreSQL cloud database)
+- **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch
 
 ### Frontend
-- **Framework:** React.js  
-- **Dependencies:** Axios, standard React libraries
+- **Framework:** React.js with Vite
+- **Authentication:** Clerk React SDK
+- **HTTP Client:** Fetch API
+- **Dependencies:** React Router, ApexCharts
 
 ## Project Structure
 
@@ -52,9 +56,11 @@ SmartAgriNode/
 
 ## Quick Start
 1. Clone the repo
-2. Create & activate Python venv
-3. Install dependencies
-4. Start servers
+2. Configure environment variables (Clerk & Supabase)
+3. Create & activate Python venv
+4. Install backend dependencies
+5. Install frontend dependencies
+6. Start servers
 
 ## Setup Instructions
 
@@ -64,7 +70,38 @@ SmartAgriNode/
    cd SmartAgriNode
 ```
 
-### 2. Create and activate Python venv:
+### 2. Configure Environment Variables:
+
+**Backend (.env in project root):**
+```bash
+   cp .env.example .env
+   # Edit .env and add:
+   # - CLERK_SECRET_KEY (from Clerk dashboard)
+   # - CLERK_PUBLISHABLE_KEY (from Clerk dashboard)
+   # - SUPABASE_URL (from Supabase project settings)
+   # - SUPABASE_ANON_KEY (from Supabase project settings)
+```
+
+**Frontend (.env in frontend-react/):**
+```bash
+   cd frontend-react
+   cp .env.example .env
+   # Edit .env and add:
+   # - VITE_CLERK_PUBLISHABLE_KEY (from Clerk dashboard)
+   cd ..
+```
+
+### 3. Setup Supabase Database:
+- Create a Supabase project at https://supabase.com
+- Go to SQL Editor and run the schema from `backend/supabase_schema.sql`
+- Copy your project URL and anon key to `.env`
+
+### 4. Setup Clerk Authentication:
+- Create a Clerk application at https://clerk.com
+- Enable desired authentication methods (email, Google, etc.)
+- Copy your publishable key and secret key to `.env` files
+
+### 5. Create and activate Python venv:
 ```bash
    python3 -m venv venv
    source venv/bin/activate   # macOS / Linux
@@ -72,12 +109,12 @@ SmartAgriNode/
    venv\Scripts\activate      # Windows
 ```
 
-### 3. Install dependencies:
+### 6. Install backend dependencies:
 ```bash
    pip install -r requirements.txt
 ```
 
-### 4. Start servers:
+### 7. Start servers:
 ```bash
    python start_servers.py
 ```
@@ -87,39 +124,51 @@ The script will automatically install frontend dependencies (npm install) if mis
 
 ## Usage
 
-Once running at http://localhost:3000 :
+Once running at http://localhost:5173 :
 
 ### Sign Up / Log In
-Create an account or log in to access features.
+- Click "Sign In" in the navigation
+- Sign up with email or social providers (Google, GitHub, etc.)
+- Clerk handles all authentication securely
 
 ### Crop Recommendation
-- Navigate to the "Crop Recommendation" page.
-- Enter soil parameters (N, P, K, pH, temperature, humidity, rainfall).
-- Click Submit to get the recommended crop.
+- Navigate to the "Crop Recommendation" page
+- Enter soil parameters (N, P, K, pH, temperature, humidity, rainfall)
+- Click "Get Recommendations" to receive AI-powered crop suggestions
+- Results are automatically saved to your history
 
 ### Weed Detection
-- Go to the "Weed Detection" page.
-- Upload an image of a field/plant.
-- The model detects and highlights weeds in the image.
+- Go to the "Weed Detection" page
+- Upload an image of a field/plant (JPG/PNG, max 16MB)
+- Click "Detect Weeds"
+- The YOLOv8 model detects and highlights weeds with bounding boxes
+- Results are automatically saved to your history
 
 ### Dashboard
-- Navigate to "Dashboard" page.
-- View soil and climate insights in an organized dashboard.
+- Navigate to "Dashboard" page
+- View soil and climate insights
+- Access your recommendation and detection history
 
 ## API Endpoints
 
+### System
+- `GET /api/health` - Check backend server and ML model status
+
 ### Authentication
-- `POST /register` - Register a new user
-- `POST /login` - Login a user
-- `GET /logout` - Logout current user
-- `GET /user` - Get currently logged-in user info
+Authentication is handled by Clerk. All protected endpoints require a valid Clerk JWT token in the `Authorization: Bearer <token>` header.
 
-### Machine Learning
-- `POST /crop-recommendation` - Submit soil and climate data to get crop recommendations
-- `POST /weed-detection` - Upload image for weed detection
+### Machine Learning (Protected)
+- `POST /api/crop-recommendation` - Submit soil and climate data for crop recommendations
+  - Requires: Authorization header with Clerk token
+  - Body: JSON with N, P, K, temperature, humidity, ph, rainfall
+- `POST /api/weed-detection` - Upload image for weed detection
+  - Requires: Authorization header with Clerk token
+  - Body: Multipart form-data with image file
 
-### System / Utility
-- `GET /health` - Check backend server status
+### API Documentation
+Interactive API documentation available at:
+- Swagger UI: http://localhost:5000/api/docs
+- ReDoc: http://localhost:5000/api/redoc
 
 
 ## Model Information

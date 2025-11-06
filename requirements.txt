@@ -1,8 +1,21 @@
-Flask
-Flask-Cors
-Flask-Login
-Flask-SQLAlchemy
-Werkzeug
+# FastAPI and ASGI server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Environment variables
+python-dotenv
+
+# Supabase client
+supabase
+
+# HTTP client for Clerk verification
+httpx
+
+# JWT verification
+PyJWT[crypto]
+
+# ML and Data Processing
 numpy
 pandas
 scikit-learn
