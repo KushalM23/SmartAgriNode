@@ -12,19 +12,13 @@ export default function AuthPage() {
         <SignedOut>
           {mode === 'sign-up' ? (
             <SignUp 
-              routing="path" 
-              path="/auth"
               signInUrl="/auth?mode=sign-in"
               afterSignUpUrl="/dashboard"
-              redirectUrl="/dashboard"
             />
           ) : (
             <SignIn 
-              routing="path" 
-              path="/auth"
               signUpUrl="/auth?mode=sign-up"
               afterSignInUrl="/dashboard"
-              redirectUrl="/dashboard"
             />
           )}
         </SignedOut>
