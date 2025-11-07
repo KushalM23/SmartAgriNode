@@ -24,3 +24,5 @@ opencv-python
 ultralytics
 torch
 Pillow
+
+gunicorn
