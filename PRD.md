@@ -1,13 +1,26 @@
 # Product Requirements Document (PRD)
 ## SmartAgriNode - AI-Powered Agriculture Dashboard
 
-**Document Version:** 1.0  
-**Last Updated:** November 5, 2025  
+**Document Version:** 2.0  
+**Last Updated:** November 9, 2025  
 **Project Repository:** [KushalM23/SmartAgriNode](https://github.com/KushalM23/SmartAgriNode)
 
 ---
 
 ## 1. Executive Summary
+
+### 1.0 Version 2.0 Summary
+
+**Major Changes in v2.0:**
+- **Backend:** Migrated from Flask to FastAPI for better performance and automatic API documentation
+- **Authentication:** Replaced Flask-Login with Clerk for enterprise-grade auth with OAuth support
+- **Database:** Migrated from SQLite to Supabase (PostgreSQL) for scalable cloud storage
+- **API Documentation:** Auto-generated Swagger UI and ReDoc at `/api/docs` and `/api/redoc`
+- **User History:** Implemented backend API for storing and retrieving user activity history
+- **Dashboard:** Enhanced with interactive ApexCharts visualizations for climate and soil data
+- **Development:** Improved startup script with better error handling and npm path resolution
+
+**Current Status:** v2.0.0 - Fully functional with authentication, ML features, and database persistence
 
 ### 1.1 Product Overview
 SmartAgriNode is an AI-powered web application designed to assist farmers and agricultural professionals in making data-driven decisions. The platform leverages machine learning models to provide intelligent crop recommendations based on soil conditions and advanced weed detection capabilities through computer vision.
@@ -93,9 +106,11 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 
 | Requirement ID | Description | Acceptance Criteria |
 |----------------|-------------|---------------------|
-| DASH-001 | Soil condition overview | - Display current soil parameters<br>- Visual indicators for parameter status<br>- Quick-access navigation to features |
-| DASH-002 | Climate insights | - Show relevant climate data<br>- Historical trends (if available)<br>- Recommendations based on conditions |
-| DASH-003 | User activity summary | - Recent crop recommendations<br>- Recent weed detection results<br>- User statistics |
+| DASH-001 | Climate conditions visualization | - Display temperature, humidity, rainfall in radial gauge charts<br>- Tabbed interface to switch between metrics<br>- Real-time data from farm parameters<br>- Visual indicators with color-coded values |
+| DASH-002 | Soil pH tracking | - Line chart showing pH levels over time<br>- Weekly trend visualization<br>- Current pH value display<br>- Optimal range indicators |
+| DASH-003 | NPK values visualization | - Bar chart for Nitrogen, Phosphorus, Potassium levels<br>- Color-coded bars<br>- Data labels on bars<br>- Clear scale and axis labels |
+| DASH-004 | Interactive charts | - ApexCharts integration<br>- Responsive design<br>- Hover tooltips<br>- Smooth animations |
+| DASH-005 | User activity summary (future) | - Recent crop recommendations<br>- Recent weed detection results<br>- User statistics |
 
 #### 3.1.5 Navigation & User Interface
 **Priority:** P0 (Critical)
@@ -198,34 +213,43 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 ### 4.2 Technology Stack
 
 #### Frontend
-- **Framework:** React.js 18+
-- **Build Tool:** Vite
-- **Routing:** React Router v6
-- **Authentication:** Clerk React SDK
+- **Framework:** React.js 19+
+- **Build Tool:** Vite (Rolldown variant)
+- **Routing:** React Router v7
+- **Authentication:** Clerk React SDK (@clerk/clerk-react v5.53+)
 - **Styling:** CSS3 (custom styles)
+- **Charts:** ApexCharts & React-ApexCharts
+- **Animations:** GSAP
+- **Icons:** React Icons
 
 #### Backend
 - **Framework:** FastAPI 0.100+
-- **ASGI Server:** Uvicorn
-- **Authentication:** Clerk JWT verification
-- **Database:** Supabase (PostgreSQL)
+- **ASGI Server:** Uvicorn (with standard extras)
+- **Authentication:** Clerk JWT verification with PyJWT
+- **Database:** Supabase Python client
 - **File Handling:** Python multipart
+- **HTTP Client:** httpx (for Clerk verification)
+- **Environment:** python-dotenv
 
 #### Machine Learning
-- **Crop Model:** Random Forest (scikit-learn)
+- **Crop Model:** Random Forest (scikit-learn, joblib)
 - **Weed Detection:** YOLOv8 (ultralytics)
 - **Deep Learning:** PyTorch
 - **Image Processing:** OpenCV, Pillow
+- **Data Processing:** NumPy, Pandas
 
 #### Database & Authentication
 - **Database:** Supabase (PostgreSQL with REST API)
 - **Authentication:** Clerk (JWT-based, OAuth support)
 - **Real-time:** Supabase Realtime (optional)
+- **Storage:** Supabase Storage (for images, future)
 
 #### Deployment
 - **Python:** 3.8+
 - **Node.js:** 16+
 - **OS:** Cross-platform (Windows, macOS, Linux)
+- **Production Backend:** Gunicorn + Uvicorn workers
+- **Production Frontend:** Vercel (recommended)
 
 ### 4.3 Data Models
 
@@ -301,6 +325,21 @@ All protected endpoints require a valid Clerk JWT token. Tokens are automaticall
 ---
 
 ### 5.2 System Endpoints
+
+#### GET /
+**Description:** API information and version
+
+**Authentication:** Not required
+
+**Response (200 OK):**
+```json
+{
+  "name": "SmartAgriNode API",
+  "version": "2.0.0",
+  "description": "AI-powered agriculture dashboard",
+  "docs": "/api/docs"
+}
+```
 
 #### GET /api/health
 **Description:** Check backend server and ML model status
@@ -386,7 +425,60 @@ Authorization: Bearer <clerk_jwt_token>
 
 ---
 
-### 5.4 API Documentation
+### 5.4 User History Endpoints
+
+#### GET /api/history
+**Description:** Get user's crop recommendations and weed detections history  
+**Authentication:** Required (Clerk JWT token)
+
+**Headers:**
+```
+Authorization: Bearer <clerk_jwt_token>
+```
+
+**Query Parameters:**
+- `limit` (optional): Maximum number of records to return (default: 10)
+
+**Response (200 OK):**
+```json
+{
+  "crop_recommendations": [
+    {
+      "id": "uuid",
+      "clerk_user_id": "user_xxx",
+      "input_data": {
+        "N": 40.0,
+        "P": 50.0,
+        "K": 60.0,
+        "temperature": 25.5,
+        "humidity": 75.0,
+        "ph": 6.5,
+        "rainfall": 200.0
+      },
+      "recommended_crop": "Rice",
+      "confidence": 0.95,
+      "created_at": "2025-11-09T10:30:00Z"
+    }
+  ],
+  "weed_detections": [
+    {
+      "id": "uuid",
+      "clerk_user_id": "user_xxx",
+      "image_filename": "field.jpg",
+      "weed_count": 3,
+      "created_at": "2025-11-09T11:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- 401: Missing or invalid authentication token
+- 500: Database error
+
+---
+
+### 5.5 API Documentation
 
 Interactive API documentation is automatically generated by FastAPI:
 
@@ -409,20 +501,23 @@ Interactive API documentation is automatically generated by FastAPI:
 - Target: Crop type (classification)
 
 **Feature Descriptions:**
-- **N (Nitrogen):** Nitrogen content in soil (kg/ha)
-- **P (Phosphorus):** Phosphorus content in soil (kg/ha)
-- **K (Potassium):** Potassium content in soil (kg/ha)
-- **Temperature:** Ambient temperature (°C)
-- **Humidity:** Relative humidity (%)
+- **N (Nitrogen):** Nitrogen content in soil (0-200 kg/ha)
+- **P (Phosphorus):** Phosphorus content in soil (0-200 kg/ha)
+- **K (Potassium):** Potassium content in soil (0-300 kg/ha)
+- **Temperature:** Ambient temperature (-10 to 50°C)
+- **Humidity:** Relative humidity (0-100%)
 - **pH:** Soil pH level (0-14 scale)
-- **Rainfall:** Annual rainfall (mm)
+- **Rainfall:** Annual rainfall (0-5000mm)
 
 **Performance Metrics (Target):**
 - Accuracy: > 95%
 - Precision: > 90%
 - Recall: > 90%
 
-**Training Notebook:** `Notebooks/CropModel_train.ipynb`
+**Implementation:**
+- Loaded lazily on first request for faster startup
+- Inference time: < 2 seconds
+- Returns crop name and confidence score (currently mock: 0.95)
 
 ---
 
@@ -436,11 +531,13 @@ Interactive API documentation is automatically generated by FastAPI:
 - Format: YOLO format (images + labels)
 - Split: Train / Validation / Test
 - Annotations: Bounding boxes for weed instances
+- Configuration: `data/weeddataset/data.yaml`
 
 **Architecture:**
 - Base Model: YOLOv8n (nano variant)
-- Input: RGB images (variable size)
+- Input: RGB images (JPG, PNG, JPEG - max 16MB)
 - Output: Bounding boxes with confidence scores
+- Post-processing: Annotated image with bounding boxes
 
 **Performance Metrics (Target):**
 - mAP@0.5: > 80%
@@ -448,7 +545,11 @@ Interactive API documentation is automatically generated by FastAPI:
 - Precision: > 85%
 - Recall: > 80%
 
-**Training Notebook:** `Notebooks/WeedModel_train.ipynb`
+**Implementation:**
+- Loaded lazily on first request for faster startup
+- Temporary file handling for upload/processing
+- Base64-encoded output for web display
+- Automatic cleanup of temporary files
 
 ---
 
@@ -507,12 +608,17 @@ Interactive API documentation is automatically generated by FastAPI:
 - Labels: Sans-serif, medium, 12-14px
 
 ### 8.4 Key UI Components
-- **Navigation Bar:** Fixed top, responsive hamburger menu for mobile
-- **Cards:** Elevated surfaces for feature sections
-- **Forms:** Clear labels, inline validation, helpful error messages
-- **Buttons:** Prominent CTAs with hover states
+- **Navigation Bar:** Fixed top, responsive design with Clerk authentication UI
+- **Cards:** Elevated surfaces for feature sections with modern styling
+- **Forms:** Clear labels, Pydantic-based validation, helpful error messages
+- **Buttons:** Prominent CTAs with hover states and loading indicators
 - **Loading Indicators:** Spinners for async operations
-- **Toast Notifications:** Success/error messages
+- **Charts:** Interactive ApexCharts for data visualization
+  - Radial gauges for climate metrics
+  - Line charts for pH tracking
+  - Bar charts for NPK values
+- **Authentication UI:** Clerk-provided sign-in/sign-up components with customizable appearance
+- **Protected Routes:** Automatic redirect to sign-in for unauthenticated users
 
 ---
 
@@ -558,12 +664,22 @@ Interactive API documentation is automatically generated by FastAPI:
 - Git for version control
 
 ### 10.2 Production Environment (Recommended)
-- **Web Server:** Gunicorn (Flask) + Nginx
-- **Frontend Hosting:** Vercel / Netlify / Static hosting
-- **Backend Hosting:** AWS EC2 / DigitalOcean / Heroku
-- **Database:** PostgreSQL / MySQL
-- **Storage:** AWS S3 / Cloud storage for uploads
-- **SSL:** HTTPS with Let's Encrypt
+- **Backend Hosting:** Railway / Render / AWS / DigitalOcean
+  - Gunicorn with Uvicorn workers
+  - Environment variables configured
+- **Frontend Hosting:** Vercel (recommended) / Netlify / Cloudflare Pages
+  - Automatic deployment from Git
+  - Environment variables for Clerk
+- **Database:** Supabase (cloud-hosted PostgreSQL)
+  - Production tier for better performance
+  - Regular backups enabled
+- **Storage:** Supabase Storage for uploaded images (future)
+- **Authentication:** Clerk production instance
+  - Custom domain configured
+  - Production keys
+- **SSL:** HTTPS with automatic certificates
+- **CDN:** Integrated with hosting platform
+- **CORS:** Updated origins for production domains
 
 ### 10.3 CI/CD Pipeline
 - Automated testing on pull requests
@@ -575,12 +691,13 @@ Interactive API documentation is automatically generated by FastAPI:
 ## 11. Future Enhancements
 
 ### 11.1 Phase 2 Features (Short-term)
-| Feature | Priority | Description |
-|---------|----------|-------------|
-| User history | P1 | Save and view past recommendations and detections |
-| Export reports | P1 | Download PDF/CSV reports of results |
-| Multi-language | P2 | Support regional languages for wider accessibility |
-| Mobile app | P2 | Native iOS/Android applications |
+| Feature | Priority | Description | Status |
+|---------|----------|-------------|--------|
+| User history display | P0 | Display past recommendations and detections in Dashboard | In Progress (API ready) |
+| Export reports | P1 | Download PDF/CSV reports of results | Planned |
+| Multi-language | P2 | Support regional languages for wider accessibility | Planned |
+| Mobile app | P2 | Native iOS/Android applications | Planned |
+| Real-time sensor integration | P1 | Automatic data input from IoT sensors | Planned |
 
 ### 11.2 Phase 3 Features (Medium-term)
 | Feature | Priority | Description |
@@ -688,16 +805,17 @@ Interactive API documentation is automatically generated by FastAPI:
 ## 17. Documentation Requirements
 
 ### 17.1 Technical Documentation
-- API documentation (Swagger/OpenAPI)
-- Code documentation (docstrings, comments)
-- Architecture diagrams
-- Deployment guides
+- API documentation (Swagger/OpenAPI) - ✅ Auto-generated at `/api/docs` and `/api/redoc`
+- Code documentation (docstrings, comments) - ✅ Implemented
+- Architecture diagrams - ✅ In PRD
+- Deployment guides - ✅ SETUP_V2.md
+- Upgrade documentation - ✅ UPGRADE_SUMMARY.md
 
 ### 17.2 User Documentation
-- User manual
-- Tutorial videos
-- FAQ section
-- Troubleshooting guide
+- User manual - ✅ Integrated in README.md
+- Tutorial videos - ⏳ Planned
+- FAQ section - ✅ In SETUP_V2.md troubleshooting
+- Troubleshooting guide - ✅ In README.md and SETUP_V2.md
 
 ---
 
@@ -731,6 +849,7 @@ Interactive API documentation is automatically generated by FastAPI:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-11-05 | Initial | Initial PRD creation |
+| 2.0 | 2025-11-09 | Update | Updated for v2.0 architecture (FastAPI + Clerk + Supabase)<br>- Added user history endpoint documentation<br>- Updated technology stack details<br>- Enhanced dashboard requirements with chart visualizations<br>- Added implementation details for ML models<br>- Updated deployment recommendations<br>- Added status to Phase 2 features<br>- Marked completed documentation items |
 
 ---
 
