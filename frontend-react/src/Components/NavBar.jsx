@@ -2,6 +2,7 @@ import CardNav from './CardNav';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useUser, useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
+import "./NavBar.css"
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -47,10 +48,10 @@ export default function NavBar() {
       rightSlot={
         <>
           <SignedIn>
-            <div className="relative">
+            <div className="user-menu">
               <button
                 type="button"
-                className={`bg-white border border-[#eee] px-3 py-2 rounded-lg cursor-pointer text-[#E01709] font-semibold transition-all duration-200 min-w-[80px] text-center h-[38px] text-sm flex items-center justify-center tracking-tighter ${hoverLogout ? '!bg-[#E01709] !text-white !border-[#E01709]' : ''}`}
+                className={`user-button ${hoverLogout ? 'danger' : ''}`}
                 onClick={handleLogout}
                 onMouseEnter={() => setHoverLogout(true)}
                 onMouseLeave={() => setHoverLogout(false)}
@@ -63,7 +64,7 @@ export default function NavBar() {
           <SignedOut>
             <button
               type="button"
-              className="bg-white border border-[#eee] px-3 py-2 rounded-lg cursor-pointer text-[#E01709] font-semibold transition-all duration-200 min-w-[80px] text-center hover:bg-[#fef2f2]"
+              className="card-nav-cta-button"
               onClick={() => navigate('/sign-in')}
             >
               Sign In

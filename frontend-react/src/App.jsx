@@ -8,7 +8,7 @@ const CropRecommendation = lazy(() => import('./Components/CropRecommendation'))
 const WeedDetection = lazy(() => import('./Components/WeedDetection'));
 const SignInPage = lazy(() => import('./Components/SignInPage'));
 const SignUpPage = lazy(() => import('./Components/SignUpPage'));
-
+import './App.css';
 
 import DotGrid from './Components/DotGrid';
 
@@ -33,8 +33,8 @@ function ProtectedRoute({ children }) {
 export default function App() {
   if (!CLERK_PUBLISHABLE_KEY) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#f5f5f5] relative p-6">
-        <h1 className="text-[#333] mb-8">Authentication not configured</h1>
+      <div className="app" style={{ padding: 24 }}>
+        <h1>Authentication not configured</h1>
         <p>Please set the VITE_CLERK_PUBLISHABLE_KEY environment variable to enable Clerk.</p>
       </div>
     );
@@ -43,8 +43,8 @@ export default function App() {
   return (
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <BrowserRouter>
-        <div className="flex flex-col min-h-screen bg-[#f5f5f5] relative">
-          <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="app">
+          <div className="app-background">
             <DotGrid
               dotSize={6}
               gap={20}
@@ -57,10 +57,8 @@ export default function App() {
               returnDuration={1.5}
             />
           </div>
-          <div className="relative z-10">
-            <NavBar />
-          </div>
-          <div className="relative z-10 flex-1 mt-5 p-8 max-w-[1200px] w-full mx-auto">
+          <NavBar />
+          <div className="content-wrapper">
             <Suspense fallback={<div style={{ padding: 24 }}>Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />

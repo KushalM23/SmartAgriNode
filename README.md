@@ -12,6 +12,21 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 
 ## Technology Stack
 
+### Backend
+- **Framework:** FastAPI (async Python web framework)
+- **Authentication:** Clerk (JWT-based authentication)
+- **Database:** Supabase (PostgreSQL cloud database)
+- **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch
+
+### Frontend
+- **Framework:** React.js with Vite
+- **Authentication:** Clerk React SDK
+- **HTTP Client:** Fetch API
+- **Dependencies:** React Router, ApexCharts
+
+## Project Structure
+
+```
 SmartAgriNode/
 ├── Models/                      # Trained ML model files
 │   ├── crop_recommendation_model.pkl
@@ -43,15 +58,11 @@ SmartAgriNode/
 ├── requirements.txt             # Python backend dependencies
 ├── setup_database.py            # Database setup helper script
 ├── start_servers.py             # Start both servers together
+├── SETUP_V2.md                  # Detailed setup instructions
+├── UPGRADE_SUMMARY.md           # v2.0 upgrade documentation
 ├── PRD.md                       # Product Requirements Document
 └── README.md                    # This file
 ```
-
-## Tech Stack
-
-- **Frontend:** React 19, Vite, Tailwind CSS, Clerk Auth, ApexCharts
-- **Backend:** FastAPI, Supabase (PostgreSQL), Clerk Auth
-- **ML:** Scikit-learn (Random Forest), YOLOv8 (Weed Detection)
 
 ## Quick Start
 1. Clone the repository
@@ -61,6 +72,8 @@ SmartAgriNode/
 5. Install backend dependencies (`pip install -r requirements.txt`)
 6. Run database schema in Supabase SQL Editor
 7. Start servers (`python start_servers.py`)
+
+**Detailed setup instructions available in [SETUP_V2.md](SETUP_V2.md)**
 
 ## Setup Instructions
 
@@ -142,9 +155,9 @@ Once running at http://localhost:5173:
 ### Crop Recommendation
 - Navigate to the "Crop Recommendation" page (requires authentication)
 - Enter soil parameters:
-- N (Nitrogen), P (Phosphorus), K (Potassium)
-- Temperature, Humidity, pH
-- Rainfall
+  - N (Nitrogen), P (Phosphorus), K (Potassium)
+  - Temperature, Humidity, pH
+  - Rainfall
 - Click "Get Recommendations" to receive AI-powered crop suggestions
 - Results are automatically saved to your history in Supabase
 
@@ -174,16 +187,16 @@ Authentication is handled by Clerk. All protected endpoints require a valid Cler
 
 ### Machine Learning (Protected)
 - `POST /api/crop-recommendation` - Submit soil and climate data for crop recommendations
-- Requires: Authorization header with Clerk token
-- Body: JSON with N, P, K, temperature, humidity, ph, rainfall
+  - Requires: Authorization header with Clerk token
+  - Body: JSON with N, P, K, temperature, humidity, ph, rainfall
 - `POST /api/weed-detection` - Upload image for weed detection
-- Requires: Authorization header with Clerk token
-- Body: Multipart form-data with image file
+  - Requires: Authorization header with Clerk token
+  - Body: Multipart form-data with image file
 
 ### User History (Protected)
 - `GET /api/history` - Retrieve user's crop recommendations and weed detections history
-- Requires: Authorization header with Clerk token
-- Returns: JSON with crop_recommendations and weed_detections arrays
+  - Requires: Authorization header with Clerk token
+  - Returns: JSON with crop_recommendations and weed_detections arrays
 
 ### API Documentation
 Interactive API documentation available at:
@@ -238,8 +251,8 @@ python -m uvicorn main:app --reload --port 5000
 
 ### Models not loading
 - Ensure required files exist:
-- `Models/crop_recommendation_model.pkl`
-- `Models/weed_detection_model.pt`
+  - `Models/crop_recommendation_model.pkl`
+  - `Models/weed_detection_model.pt`
 - Check file names match exactly what `backend/main.py` expects
 - Visit http://localhost:5000/api/health to verify model status
 
@@ -266,6 +279,8 @@ Open manually at:
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 - API Docs: http://localhost:5000/api/docs
+
+For more detailed troubleshooting, see [SETUP_V2.md](SETUP_V2.md)
 
 ## Contributing
 

@@ -1,8 +1,10 @@
 import { SignUp } from '@clerk/clerk-react';
 import clerkAppearance from './authAppearance';
+import './AuthPages.css';
+
 export default function SignUpPage() {
   return (
-    <div className="min-h-[calc(100vh-120px)] flex items-center justify-center p-4 py-8 sm:px-6 sm:py-0">
+    <div className="auth-page">
       <SignUp
         routing="path"
         path="/sign-up"
