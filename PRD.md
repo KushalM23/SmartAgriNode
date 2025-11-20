@@ -2,7 +2,7 @@
 ## SmartAgriNode - AI-Powered Agriculture Dashboard
 
 **Document Version:** 2.0  
-**Last Updated:** November 9, 2025  
+**Last Updated:** November 20, 2025  
 **Project Repository:** [KushalM23/SmartAgriNode](https://github.com/KushalM23/SmartAgriNode)
 
 ---
@@ -217,7 +217,8 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 - **Build Tool:** Vite (Rolldown variant)
 - **Routing:** React Router v7
 - **Authentication:** Clerk React SDK (@clerk/clerk-react v5.53+)
-- **Styling:** CSS3 (custom styles)
+- **Styling:** Tailwind CSS, Vanilla CSS
+- **UI Components:** React Bits (DotGrid)
 - **Charts:** ApexCharts & React-ApexCharts
 - **Animations:** GSAP
 - **Icons:** React Icons

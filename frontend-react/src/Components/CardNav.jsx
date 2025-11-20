@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef, useState, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './CardNav.css';
- 
+
 const CardNav = ({
   items,
   className = '',
@@ -15,8 +14,7 @@ const CardNav = ({
   const location = useLocation();
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  // Dropdown is not used; removed to avoid unused state
-  
+
   // Close menu when route changes
   useEffect(() => {
     setIsExpanded(false);
@@ -153,23 +151,27 @@ const CardNav = ({
   };
 
   return (
-    <div className={`card-nav-container ${className}`}>
-      <nav ref={navRef} className={`card-nav ${isExpanded ? 'open' : ''}`} style={{ backgroundColor: baseColor }}>
-        <div className="card-nav-top">
+    <div className={`fixed top-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] z-[99] box-border md:top-[1.2em] ${className}`}>
+      <nav
+        ref={navRef}
+        className={`block h-[60px] p-0 bg-white rounded-[10px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] relative overflow-hidden will-change-[height] ${isExpanded ? 'open' : ''}`}
+        style={{ backgroundColor: baseColor }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-[60px] flex items-center justify-between py-[0.35rem] px-[0.45rem] pl-[1.1rem] z-[2] md:px-4 md:justify-between">
           <div
-            className={`hamburger-menu ${isHamburgerOpen ? 'open' : ''}`}
+            className={`h-full flex flex-col items-center justify-center cursor-pointer gap-[6px] md:order-2 group ${isHamburgerOpen ? 'open' : ''}`}
             onClick={toggleMenu}
             role="button"
             aria-label={isExpanded ? 'Close menu' : 'Open menu'}
             tabIndex={0}
             style={{ color: menuColor || '#000' }}
           >
-            <div className="hamburger-line" />
-            <div className="hamburger-line" />
+            <div className={`w-[30px] h-[2px] bg-current transition-all duration-250 ease-out origin-center group-hover:opacity-75 ${isHamburgerOpen ? 'translate-y-[4px] rotate-45' : ''}`} />
+            <div className={`w-[30px] h-[2px] bg-current transition-all duration-250 ease-out origin-center group-hover:opacity-75 ${isHamburgerOpen ? '-translate-y-[4px] -rotate-45' : ''}`} />
           </div>
 
-          <div className="logo-container" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <h1 style={{ color: "#E01709", margin: 0 }}>SmartAgriNode</h1>
+          <div className="flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:transform-none md:order-1" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+            <h1 className="m-0 text-[#E01709]">SmartAgriNode</h1>
           </div>
 
           {rightSlot ? (
@@ -177,7 +179,7 @@ const CardNav = ({
           ) : (
             <button
               type="button"
-              className="card-nav-cta-button"
+              className="bg-white text-[#E01709] border border-[#eee] rounded-lg px-3 py-2 h-[38px] font-semibold cursor-pointer text-sm flex items-center justify-center tracking-tighter transition-all duration-200 min-w-[80px] text-center md:hidden"
               onClick={() => navigate('/signup')}
             >
               Account
@@ -185,16 +187,16 @@ const CardNav = ({
           )}
         </div>
 
-        <div className="card-nav-content" aria-hidden={!isExpanded}>
+        <div className={`absolute left-0 right-0 top-[60px] bottom-0 p-2 flex items-start gap-2 invisible pointer-events-none z-[1] card-nav-content md:flex-col md:items-stretch md:bottom-0 md:justify-start ${isExpanded ? '!visible !pointer-events-auto' : ''}`} aria-hidden={!isExpanded}>
           {items.map((item, idx) => (
             <div
               key={`${item.label}-${idx}`}
-              className="nav-card"
+              className="h-[100px] flex-1 min-w-0 rounded-lg relative flex items-center justify-center px-4 py-2 select-none cursor-pointer bg-[#f5f5f5] transition-colors duration-200 m-[10px] hover:bg-[#eeeeee] md:h-auto md:min-h-[60px] md:flex-auto md:max-h-none"
               ref={setCardRef(idx)}
               style={{ backgroundColor: item.bgColor, color: item.textColor }}
               onClick={() => handleItemClick(item)}
             >
-              <div className="nav-card-label">{item.label}</div>
+              <div className="font-medium text-base tracking-tighter text-center text-[#f5f5f5] md:text-lg">{item.label}</div>
             </div>
           ))}
         </div>

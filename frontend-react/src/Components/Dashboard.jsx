@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
 
 export default function Dashboard() {
@@ -134,7 +133,7 @@ export default function Dashboard() {
             fontSize: '24px',
             color: '#E01709',
             offsetY: -20,
-            formatter: function() {
+            formatter: function () {
               return farmData.temperature.toFixed(1) + '°C';
             }
           }
@@ -217,7 +216,7 @@ export default function Dashboard() {
     tooltip: {
       theme: 'light',
       y: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val.toFixed(1) + ' pH';
         }
       }
@@ -232,44 +231,44 @@ export default function Dashboard() {
   }];
 
   return (
-    <div className="page-container dashboard-container">
-      <h1>Smart Farm Dashboard</h1>
-      
-      <div className="dashboard-grid">
-        <div className="dashboard-card metrics-card">
-          <h3>Climate Conditions</h3>
-          <div className="tabs">
-            <button 
-              className={`tab ${activeTab === 'temperature' ? 'active' : ''}`}
+    <div className="w-full p-8 bg-[#f8f9fa]">
+      <h1 className="text-[#333] text-[2rem] font-semibold mb-6 tracking-tighter text-center">Smart Farm Dashboard</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 p-4">
+        <div className="bg-white rounded-xl p-8 shadow-[0_4px_6px_rgba(0,0,0,0.05)] transition-all duration-200 ease-out text-center min-h-[320px] flex flex-col relative overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_8px_15px_rgba(224,23,9,0.08)] bg-gradient-to-br from-white to-[#f8f9fa] row-span-1">
+          <h3 className="text-[#E01709] mb-6 text-[1.2rem] font-semibold tracking-tighter">Climate Conditions</h3>
+          <div className="inline-flex items-center gap-0 p-1 bg-[#f8f9fa] border border-[#e9ecef] rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+            <button
+              className={`flex-1 px-[18px] py-[10px] border-0 bg-transparent text-[#6c757d] cursor-pointer text-[0.9rem] font-medium rounded-lg transition-all duration-300 ease-out relative text-center hover:bg-[rgba(224,23,9,0.05)] hover:text-[#E01709] ${activeTab === 'temperature' ? '!bg-[#E01709] !text-white !font-semibold shadow-[0_2px_8px_rgba(224,23,9,0.3)]' : ''}`}
               onClick={() => setActiveTab('temperature')}
             >
               Temperature
             </button>
-            <button 
-              className={`tab ${activeTab === 'humidity' ? 'active' : ''}`}
+            <button
+              className={`flex-1 px-[18px] py-[10px] border-0 bg-transparent text-[#6c757d] cursor-pointer text-[0.9rem] font-medium rounded-lg transition-all duration-300 ease-out relative text-center hover:bg-[rgba(224,23,9,0.05)] hover:text-[#E01709] ${activeTab === 'humidity' ? '!bg-[#E01709] !text-white !font-semibold shadow-[0_2px_8px_rgba(224,23,9,0.3)]' : ''}`}
               onClick={() => setActiveTab('humidity')}
             >
               Humidity
             </button>
-            <button 
-              className={`tab ${activeTab === 'rainfall' ? 'active' : ''}`}
+            <button
+              className={`flex-1 px-[18px] py-[10px] border-0 bg-transparent text-[#6c757d] cursor-pointer text-[0.9rem] font-medium rounded-lg transition-all duration-300 ease-out relative text-center hover:bg-[rgba(224,23,9,0.05)] hover:text-[#E01709] ${activeTab === 'rainfall' ? '!bg-[#E01709] !text-white !font-semibold shadow-[0_2px_8px_rgba(224,23,9,0.3)]' : ''}`}
               onClick={() => setActiveTab('rainfall')}
             >
               Rainfall
             </button>
           </div>
-          <div className="metrics-content">
+          <div className="flex-1 flex justify-center items-center mt-4">
             {activeTab === 'temperature' && (
-              <div className="circular-progress">
-                <ReactApexChart 
-                  options={tempGaugeOptions} 
-                  series={tempGaugeSeries} 
-                  type="radialBar" 
+              <div className="flex flex-col items-center h-full">
+                <ReactApexChart
+                  options={tempGaugeOptions}
+                  series={tempGaugeSeries}
+                  type="radialBar"
                 />
               </div>
             )}
             {activeTab === 'humidity' && (
-              <div className="circular-progress">
+              <div className="flex flex-col items-center h-full">
                 <ReactApexChart
                   options={{
                     ...tempGaugeOptions,
@@ -284,7 +283,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function() {
+                            formatter: function () {
                               return farmData.humidity + '%';
                             }
                           }
@@ -298,7 +297,7 @@ export default function Dashboard() {
               </div>
             )}
             {activeTab === 'rainfall' && (
-              <div className="circular-progress">
+              <div className="flex flex-col items-center h-full">
                 <ReactApexChart
                   options={{
                     ...tempGaugeOptions,
@@ -313,7 +312,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function() {
+                            formatter: function () {
                               return farmData.rainfall + ' mm';
                             }
                           }
@@ -329,22 +328,22 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="dashboard-card ph-card">
-          <h3>Soil pH</h3>
-          <ReactApexChart 
-            options={phChartOptions} 
-            series={phChartSeries} 
-            type="line" 
+        <div className="bg-white rounded-xl p-8 shadow-[0_4px_6px_rgba(0,0,0,0.05)] transition-all duration-200 ease-out text-center min-h-[320px] flex flex-col relative overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_8px_15px_rgba(224,23,9,0.08)] bg-gradient-to-br from-white to-[#f8f9fa] row-span-1 items-center justify-between">
+          <h3 className="text-[#E01709] mb-6 text-[1.2rem] font-semibold tracking-tighter">Soil pH</h3>
+          <ReactApexChart
+            options={phChartOptions}
+            series={phChartSeries}
+            type="line"
           />
-          <div className="data-label">Current: {farmData.pH} pH</div>
+          <div className="text-[#666] text-[0.95rem] mt-auto font-medium">Current: {farmData.pH} pH</div>
         </div>
 
-        <div className="dashboard-card npk-card">
-          <h3>NPK Values</h3>
-          <ReactApexChart 
-            options={npkChartOptions} 
-            series={npkChartSeries} 
-            type="bar" 
+        <div className="bg-white rounded-xl p-8 shadow-[0_4px_6px_rgba(0,0,0,0.05)] transition-all duration-200 ease-out text-center min-h-[320px] flex flex-col relative overflow-hidden hover:-translate-y-[3px] hover:shadow-[0_8px_15px_rgba(224,23,9,0.08)] bg-gradient-to-br from-white to-[#f8f9fa] md:col-span-2">
+          <h3 className="text-[#E01709] mb-6 text-[1.2rem] font-semibold tracking-tighter">NPK Values</h3>
+          <ReactApexChart
+            options={npkChartOptions}
+            series={npkChartSeries}
+            type="bar"
           />
         </div>
       </div>
