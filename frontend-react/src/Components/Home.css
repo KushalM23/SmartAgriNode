@@ -5,9 +5,13 @@
 
 .hero-section {
   padding: 4rem 2rem;
-  background: linear-gradient(rgba(224, 23, 9, 0.05), rgba(224, 23, 9, 0.02));
   border-radius: 15px;
   margin-bottom: 4rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
 }
 
 .hero-section h1 {

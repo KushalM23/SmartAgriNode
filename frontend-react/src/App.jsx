@@ -10,6 +10,8 @@ const SignInPage = lazy(() => import('./Components/SignInPage'));
 const SignUpPage = lazy(() => import('./Components/SignUpPage'));
 import './App.css';
 
+import DotGrid from './Components/DotGrid';
+
 // Get Clerk publishable key from environment
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -42,9 +44,22 @@ export default function App() {
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <BrowserRouter>
         <div className="app">
+          <div className="app-background">
+            <DotGrid
+              dotSize={6}
+              gap={20}
+              baseColor="#edececff"
+              activeColor="#ff2727"
+              proximity={120}
+              shockRadius={250}
+              shockStrength={5}
+              resistance={750}
+              returnDuration={1.5}
+            />
+          </div>
           <NavBar />
           <div className="content-wrapper">
-            <Suspense fallback={<div style={{padding: 24}}>Loading…</div>}>
+            <Suspense fallback={<div style={{ padding: 24 }}>Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/sign-in/*" element={<SignInPage />} />
