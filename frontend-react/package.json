@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.53.6",
+
+    "@supabase/supabase-js": "^2.84.0",
     "apexcharts": "^5.3.5",
     "gsap": "^3.13.0",
     "react": "^19.1.1",

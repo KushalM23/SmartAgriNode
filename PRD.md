@@ -13,10 +13,11 @@
 
 **Major Changes in v2.0:**
 - **Backend:** Migrated from Flask to FastAPI for better performance and automatic API documentation
-- **Authentication:** Replaced Flask-Login with Clerk for enterprise-grade auth with OAuth support
+- **Authentication:** Replaced Clerk with Supabase Auth for integrated user management
 - **Database:** Migrated from SQLite to Supabase (PostgreSQL) for scalable cloud storage
 - **API Documentation:** Auto-generated Swagger UI and ReDoc at `/api/docs` and `/api/redoc`
 - **User History:** Implemented backend API for storing and retrieving user activity history
+- **Account Page:** Added dedicated user profile management and detailed history view
 - **Dashboard:** Enhanced with interactive ApexCharts visualizations for climate and soil data
 - **Development:** Improved startup script with better error handling and npm path resolution
 
@@ -75,11 +76,20 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 
 | Requirement ID | Description | Acceptance Criteria |
 |----------------|-------------|---------------------|
-| AUTH-001 | User registration via Clerk | - Email/password signup<br>- Social OAuth (Google, GitHub, etc.)<br>- Magic link authentication<br>- Automatic user profile creation |
-| AUTH-002 | User login via Clerk | - Multiple authentication methods<br>- JWT token generation<br>- Session management<br>- Redirect to dashboard on success |
-| AUTH-003 | User logout functionality | - Clear Clerk session<br>- Clear client-side state<br>- Redirect to home page |
+| AUTH-001 | User registration via Supabase | - Email/password signup<br>- Automatic user profile creation in public table |
+| AUTH-002 | User login via Supabase | - Email/password login<br>- JWT token generation<br>- Session management<br>- Redirect to dashboard on success |
+| AUTH-003 | User logout functionality | - Clear Supabase session<br>- Clear client-side state<br>- Redirect to home page |
 | AUTH-004 | Protected route access | - JWT token verification on backend<br>- Restrict ML endpoints to authenticated users<br>- Automatic redirect to auth page for unauthenticated users |
 | AUTH-005 | Session persistence | - Maintain user session across page refreshes<br>- Token refresh mechanism<br>- Secure token storage |
+
+#### 3.1.2 Account Management
+**Priority:** P1 (High)
+
+| Requirement ID | Description | Acceptance Criteria |
+|----------------|-------------|---------------------|
+| ACC-001 | Profile Management | - View username and email<br>- Upload/update profile picture (avatar)<br>- Avatar stored in Supabase Storage |
+| ACC-002 | History View | - View list of past crop recommendations<br>- View list of past weed detections<br>- Click to view details in modal |
+| ACC-003 | Theme Toggle | - Toggle between light and dark mode (UI placeholder implemented) |
 
 #### 3.1.2 Crop Recommendation System
 **Priority:** P0 (Critical)
@@ -134,7 +144,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 #### 3.2.2 Security
 | Requirement ID | Description | Implementation |
 |----------------|-------------|----------------|
-| SEC-001 | Authentication security | Clerk JWT-based authentication with industry-standard encryption |
+| SEC-001 | Authentication security | Supabase Auth (JWT-based) with industry-standard encryption |
 | SEC-002 | API endpoint protection | JWT token verification on all protected endpoints |
 | SEC-003 | CORS policy | Restrict to allowed origins (localhost in dev, production domains) |
 | SEC-004 | File upload security | Validate file types, size limits, secure temporary storage |
@@ -216,7 +226,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 - **Framework:** React.js 19+
 - **Build Tool:** Vite (Rolldown variant)
 - **Routing:** React Router v7
-- **Authentication:** Clerk React SDK (@clerk/clerk-react v5.53+)
+- **Authentication:** Supabase JS Client
 - **Styling:** CSS3 (custom styles)
 - **Charts:** ApexCharts & React-ApexCharts
 - **Animations:** GSAP
@@ -225,10 +235,10 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 #### Backend
 - **Framework:** FastAPI 0.100+
 - **ASGI Server:** Uvicorn (with standard extras)
-- **Authentication:** Clerk JWT verification with PyJWT
+- **Authentication:** Supabase Auth (JWT verification)
 - **Database:** Supabase Python client
 - **File Handling:** Python multipart
-- **HTTP Client:** httpx (for Clerk verification)
+- **HTTP Client:** httpx
 - **Environment:** python-dotenv
 
 #### Machine Learning
@@ -240,9 +250,9 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 
 #### Database & Authentication
 - **Database:** Supabase (PostgreSQL with REST API)
-- **Authentication:** Clerk (JWT-based, OAuth support)
+- **Authentication:** Supabase Auth (Email/Password, OAuth)
 - **Real-time:** Supabase Realtime (optional)
-- **Storage:** Supabase Storage (for images, future)
+- **Storage:** Supabase Storage (for avatars)
 
 #### Deployment
 - **Python:** 3.8+
@@ -256,10 +266,10 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 #### User Model (Supabase)
 ```sql
 users {
-  id: UUID (Primary Key),
-  clerk_user_id: TEXT (Unique, Not Null),
+  user_id: UUID (Primary Key, FK to auth.users),
   email: TEXT (Not Null),
   username: TEXT,
+  avatar_url: TEXT,
   created_at: TIMESTAMP,
   updated_at: TIMESTAMP
 }
@@ -269,7 +279,7 @@ users {
 ```sql
 crop_recommendations {
   id: UUID (Primary Key),
-  clerk_user_id: TEXT (Foreign Key),
+  user_id: UUID (Foreign Key),
   input_data: JSONB (N, P, K, temp, humidity, ph, rainfall),
   recommended_crop: TEXT,
   confidence: FLOAT,
@@ -281,7 +291,7 @@ crop_recommendations {
 ```sql
 weed_detections {
   id: UUID (Primary Key),
-  clerk_user_id: TEXT (Foreign Key),
+  user_id: UUID (Foreign Key),
   image_filename: TEXT,
   weed_count: INTEGER,
   created_at: TIMESTAMP
@@ -313,14 +323,14 @@ Authorization: Bearer <clerk_jwt_token>
 
 ### 5.1 Authentication
 
-Authentication is handled entirely by Clerk. The backend verifies JWT tokens provided in the `Authorization` header.
+Authentication is handled entirely by Supabase. The backend verifies JWT tokens provided in the `Authorization` header.
 
 **Authorization Header Format:**
 ```
-Authorization: Bearer <clerk_jwt_token>
+Authorization: Bearer <supabase_jwt_token>
 ```
 
-All protected endpoints require a valid Clerk JWT token. Tokens are automatically obtained by the Clerk React SDK on the frontend.
+All protected endpoints require a valid Supabase JWT token. Tokens are automatically obtained by the Supabase JS Client on the frontend.
 
 ---
 
@@ -362,11 +372,11 @@ All protected endpoints require a valid Clerk JWT token. Tokens are automaticall
 
 #### POST /api/crop-recommendation
 **Description:** Get crop recommendation based on soil parameters  
-**Authentication:** Required (Clerk JWT token)
+**Authentication:** Required (Supabase JWT token)
 
 **Headers:**
 ```
-Authorization: Bearer <clerk_jwt_token>
+Authorization: Bearer <supabase_jwt_token>
 Content-Type: application/json
 ```
 
@@ -400,11 +410,11 @@ Content-Type: application/json
 
 #### POST /api/weed-detection
 **Description:** Detect weeds in uploaded image  
-**Authentication:** Required (Clerk JWT token)
+**Authentication:** Required (Supabase JWT token)
 
 **Headers:**
 ```
-Authorization: Bearer <clerk_jwt_token>
+Authorization: Bearer <supabase_jwt_token>
 ```
 
 **Request:** Multipart form-data with 'image' field
@@ -429,11 +439,11 @@ Authorization: Bearer <clerk_jwt_token>
 
 #### GET /api/history
 **Description:** Get user's crop recommendations and weed detections history  
-**Authentication:** Required (Clerk JWT token)
+**Authentication:** Required (Supabase JWT token)
 
 **Headers:**
 ```
-Authorization: Bearer <clerk_jwt_token>
+Authorization: Bearer <supabase_jwt_token>
 ```
 
 **Query Parameters:**
@@ -445,7 +455,7 @@ Authorization: Bearer <clerk_jwt_token>
   "crop_recommendations": [
     {
       "id": "uuid",
-      "clerk_user_id": "user_xxx",
+      "user_id": "uuid",
       "input_data": {
         "N": 40.0,
         "P": 50.0,
@@ -463,7 +473,7 @@ Authorization: Bearer <clerk_jwt_token>
   "weed_detections": [
     {
       "id": "uuid",
-      "clerk_user_id": "user_xxx",
+      "user_id": "uuid",
       "image_filename": "field.jpg",
       "weed_count": 3,
       "created_at": "2025-11-09T11:00:00Z"
@@ -617,7 +627,7 @@ Interactive API documentation is automatically generated by FastAPI:
   - Radial gauges for climate metrics
   - Line charts for pH tracking
   - Bar charts for NPK values
-- **Authentication UI:** Clerk-provided sign-in/sign-up components with customizable appearance
+- **Authentication UI:** Custom Sign-in/Sign-up components with Supabase integration
 - **Protected Routes:** Automatic redirect to sign-in for unauthenticated users
 
 ---

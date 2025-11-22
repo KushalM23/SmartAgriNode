@@ -23,7 +23,7 @@ logger = logging.getLogger("SmartAgriNode.database")
 
 if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY:
     try:
-        # Use SERVICE_ROLE_KEY to bypass RLS since we're using Clerk auth
+        # Use SERVICE_ROLE_KEY to bypass RLS
         supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
         logger.info("Supabase client initialized")
     except Exception:  # pragma: no cover - configuration issue
@@ -42,12 +42,33 @@ class SupabaseDB:
         return supabase
     
     @staticmethod
-    async def store_user_metadata(user_id: str, email: str, username: Optional[str] = None) -> Dict[str, Any]:
+    async def verify_jwt(token: str) -> Optional[Dict[str, Any]]:
         """
-        Store user metadata from Clerk
+        Verify Supabase JWT token
         
         Args:
-            user_id: Clerk user ID
+            token: JWT token string
+            
+        Returns:
+            User data if valid, None otherwise
+        """
+        if not supabase:
+            return None
+            
+        try:
+            user = supabase.auth.get_user(token)
+            return user.user if user else None
+        except Exception:
+            logger.exception("Token verification failed")
+            return None
+    
+    @staticmethod
+    async def store_user_metadata(user_id: str, email: str, username: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Store user metadata
+        
+        Args:
+            user_id: User ID
             email: User email
             username: Optional username
             
@@ -60,25 +81,25 @@ class SupabaseDB:
         
         try:
             data = {
-                "clerk_user_id": user_id,
+                "user_id": user_id,
                 "email": email,
                 "username": username or email.split('@')[0]
             }
             
             # Upsert user metadata
-            result = supabase.table("users").upsert(data, on_conflict="clerk_user_id").execute()
+            result = supabase.table("users").upsert(data, on_conflict="user_id").execute()
             return result.data[0] if result.data else data
         except Exception:
             logger.exception("Error storing user metadata")
             return {"user_id": user_id, "email": email}
     
     @staticmethod
-    async def get_user_by_clerk_id(user_id: str) -> Optional[Dict[str, Any]]:
+    async def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         """
-        Get user by Clerk user ID
+        Get user by User ID
         
         Args:
-            user_id: Clerk user ID
+            user_id: User ID
             
         Returns:
             User record or None
@@ -87,7 +108,7 @@ class SupabaseDB:
             return None
         
         try:
-            result = supabase.table("users").select("*").eq("clerk_user_id", user_id).execute()
+            result = supabase.table("users").select("*").eq("user_id", user_id).execute()
             return result.data[0] if result.data else None
         except Exception:
             logger.exception("Error fetching user")
@@ -104,7 +125,7 @@ class SupabaseDB:
         Store crop recommendation history
         
         Args:
-            user_id: Clerk user ID
+            user_id: User ID
             input_data: Input parameters (N, P, K, etc.)
             recommendation: Recommended crop
             confidence: Prediction confidence
@@ -118,7 +139,7 @@ class SupabaseDB:
         
         try:
             data = {
-                "clerk_user_id": user_id,
+                "user_id": user_id,
                 "input_data": input_data,
                 "recommended_crop": recommendation,
                 "confidence": confidence
@@ -140,7 +161,7 @@ class SupabaseDB:
         Store weed detection history
         
         Args:
-            user_id: Clerk user ID
+            user_id: User ID
             filename: Uploaded image filename
             detections: Number of weeds detected
             
@@ -153,7 +174,7 @@ class SupabaseDB:
         
         try:
             data = {
-                "clerk_user_id": user_id,
+                "user_id": user_id,
                 "image_filename": filename,
                 "weed_count": detections
             }
@@ -170,7 +191,7 @@ class SupabaseDB:
         Get user's recommendation and detection history
         
         Args:
-            user_id: Clerk user ID
+            user_id: User ID
             limit: Maximum records to fetch
             
         Returns:
@@ -182,14 +203,14 @@ class SupabaseDB:
         try:
             crop_recs = supabase.table("crop_recommendations")\
                 .select("*")\
-                .eq("clerk_user_id", user_id)\
+                .eq("user_id", user_id)\
                 .order("created_at", desc=True)\
                 .limit(limit)\
                 .execute()
             
             weed_dets = supabase.table("weed_detections")\
                 .select("*")\
-                .eq("clerk_user_id", user_id)\
+                .eq("user_id", user_id)\
                 .order("created_at", desc=True)\
                 .limit(limit)\
                 .execute()

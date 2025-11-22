@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
+import History from './History';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('temperature');
@@ -134,7 +135,7 @@ export default function Dashboard() {
             fontSize: '24px',
             color: '#E01709',
             offsetY: -20,
-            formatter: function() {
+            formatter: function () {
               return farmData.temperature.toFixed(1) + '°C';
             }
           }
@@ -217,7 +218,7 @@ export default function Dashboard() {
     tooltip: {
       theme: 'light',
       y: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val.toFixed(1) + ' pH';
         }
       }
@@ -234,24 +235,24 @@ export default function Dashboard() {
   return (
     <div className="page-container dashboard-container">
       <h1>Smart Farm Dashboard</h1>
-      
+
       <div className="dashboard-grid">
         <div className="dashboard-card metrics-card">
           <h3>Climate Conditions</h3>
           <div className="tabs">
-            <button 
+            <button
               className={`tab ${activeTab === 'temperature' ? 'active' : ''}`}
               onClick={() => setActiveTab('temperature')}
             >
               Temperature
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'humidity' ? 'active' : ''}`}
               onClick={() => setActiveTab('humidity')}
             >
               Humidity
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'rainfall' ? 'active' : ''}`}
               onClick={() => setActiveTab('rainfall')}
             >
@@ -261,10 +262,10 @@ export default function Dashboard() {
           <div className="metrics-content">
             {activeTab === 'temperature' && (
               <div className="circular-progress">
-                <ReactApexChart 
-                  options={tempGaugeOptions} 
-                  series={tempGaugeSeries} 
-                  type="radialBar" 
+                <ReactApexChart
+                  options={tempGaugeOptions}
+                  series={tempGaugeSeries}
+                  type="radialBar"
                 />
               </div>
             )}
@@ -284,7 +285,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function() {
+                            formatter: function () {
                               return farmData.humidity + '%';
                             }
                           }
@@ -313,7 +314,7 @@ export default function Dashboard() {
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: '#E01709',
-                            formatter: function() {
+                            formatter: function () {
                               return farmData.rainfall + ' mm';
                             }
                           }
@@ -331,23 +332,25 @@ export default function Dashboard() {
 
         <div className="dashboard-card ph-card">
           <h3>Soil pH</h3>
-          <ReactApexChart 
-            options={phChartOptions} 
-            series={phChartSeries} 
-            type="line" 
+          <ReactApexChart
+            options={phChartOptions}
+            series={phChartSeries}
+            type="line"
           />
           <div className="data-label">Current: {farmData.pH} pH</div>
         </div>
 
         <div className="dashboard-card npk-card">
           <h3>NPK Values</h3>
-          <ReactApexChart 
-            options={npkChartOptions} 
-            series={npkChartSeries} 
-            type="bar" 
+          <ReactApexChart
+            options={npkChartOptions}
+            series={npkChartSeries}
+            type="bar"
           />
         </div>
       </div>
+
+      <History />
     </div>
   );
 }

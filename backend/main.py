@@ -140,13 +140,10 @@ class HistoryResponse(BaseModel):
     crop_recommendations: list
     weed_detections: list
 
-# Clerk JWT verification
-CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
-CLERK_PUBLISHABLE_KEY = os.getenv("CLERK_PUBLISHABLE_KEY")
-
-async def verify_clerk_token(authorization: Optional[str] = Header(None)) -> dict:
+# Supabase JWT verification
+async def verify_supabase_token(authorization: Optional[str] = Header(None)) -> dict:
     """
-    Verify Clerk JWT token from Authorization header
+    Verify Supabase JWT token from Authorization header
     Returns user data if valid, raises HTTPException if invalid
     """
     if not authorization:
@@ -160,29 +157,19 @@ async def verify_clerk_token(authorization: Optional[str] = Header(None)) -> dic
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     
-    # Development mode: decode without verification
-    # In production, you should properly verify JWT signatures using Clerk's JWKS endpoint
-    try:
-        import jwt
-        
-        # Decode JWT without verification for development
-        # This allows testing without network calls to Clerk's API
-        decoded = jwt.decode(token, options={"verify_signature": False})
-
-        logger.info("Token decoded for user %s", decoded.get("sub", "unknown"))
+    # Verify token using Supabase client
+    user = await SupabaseDB.verify_jwt(token)
+    
+    if user:
+        logger.info("Token verified for user %s", user.id)
         return {
-            "user_id": decoded.get("sub"),
-            "session_id": decoded.get("sid"),
-            "email": decoded.get("email")
+            "user_id": user.id,
+            "email": user.email
         }
-        
-    except jwt.DecodeError:
-        raise HTTPException(status_code=401, detail="Invalid token format")
-    except Exception:
-        logger.exception("Token verification error")
-        # In development, allow requests even if token verification fails
-        logger.warning("Development mode: Allowing request despite token error")
-        return {"user_id": "dev_user", "email": "dev@example.com"}
+    else:
+        # Development fallback (optional, remove in strict production)
+        # logger.warning("Token verification failed")
+        raise HTTPException(status_code=401, detail="Invalid token or expired session")
 
 # API Routes
 
@@ -217,7 +204,7 @@ async def health_check():
         500: {"model": ErrorResponse}
     }
 )
-async def get_history(user: dict = Depends(verify_clerk_token)):
+async def get_history(user: dict = Depends(verify_supabase_token)):
     """
     Get recent crop recommendations and weed detections for the authenticated user
     """
@@ -238,7 +225,7 @@ async def get_history(user: dict = Depends(verify_clerk_token)):
 )
 async def crop_recommendation(
     data: CropRecommendationInput,
-    user: dict = Depends(verify_clerk_token)
+    user: dict = Depends(verify_supabase_token)
 ):
     """
     Get crop recommendation based on soil and environmental parameters
@@ -302,7 +289,7 @@ async def crop_recommendation(
 )
 async def weed_detection(
     image: UploadFile = File(...),
-    user: dict = Depends(verify_clerk_token)
+    user: dict = Depends(verify_supabase_token)
 ):
     """
     Detect weeds in uploaded image

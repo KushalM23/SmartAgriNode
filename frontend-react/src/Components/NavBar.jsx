@@ -1,19 +1,12 @@
 import CardNav from './CardNav';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useUser, useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
+import { useAuth } from '../Context/AuthContext';
 import "./NavBar.css"
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const { signOut } = useClerk();
-  const [hoverLogout, setHoverLogout] = useState(false);
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
-  };
+  const { user } = useAuth();
 
   const items = [
     {
@@ -47,21 +40,26 @@ export default function NavBar() {
       ease="power3.out"
       rightSlot={
         <>
-          <SignedIn>
+          {user ? (
             <div className="user-menu">
               <button
                 type="button"
-                className={`user-button ${hoverLogout ? 'danger' : ''}`}
-                onClick={handleLogout}
-                onMouseEnter={() => setHoverLogout(true)}
-                onMouseLeave={() => setHoverLogout(false)}
-                title={hoverLogout ? 'Click to logout' : `Logged in as ${user?.username || user?.firstName || 'User'}`}
+                className="user-button"
+                onClick={() => navigate('/account')}
+                title="Go to Account"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                {hoverLogout ? 'Logout' : (user?.username || user?.firstName || 'User')}
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Avatar"
+                    style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : null}
+                {user.user_metadata?.username || user.email.split('@')[0]}
               </button>
             </div>
-          </SignedIn>
-          <SignedOut>
+          ) : (
             <button
               type="button"
               className="card-nav-cta-button"
@@ -69,7 +67,7 @@ export default function NavBar() {
             >
               Sign In
             </button>
-          </SignedOut>
+          )}
         </>
       }
     />

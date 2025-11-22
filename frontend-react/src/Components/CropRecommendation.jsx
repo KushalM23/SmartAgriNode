@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../Context/AuthContext';
 import { api } from '../lib/api';
 import './CropRecommendation.css';
 
 export default function CropRecommendation() {
-  const { getToken } = useAuth();
+  const { session } = useAuth();
   const [formData, setFormData] = useState({
     N: '',
     P: '',
@@ -28,10 +28,14 @@ export default function CropRecommendation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!session) { setError('Please log in to use this feature'); return; }
+
     setError('');
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = session?.access_token;
+      if (!token) throw new Error('Authentication token missing');
+
       const payload = {
         N: parseFloat(formData.N),
         P: parseFloat(formData.P),
@@ -44,6 +48,7 @@ export default function CropRecommendation() {
       const res = await api.cropRecommendation(payload, token);
       setResult(res);
     } catch (err) {
+      console.error("Crop recommendation error:", err);
       setError(err.message || 'Prediction failed');
     } finally {
       setLoading(false);

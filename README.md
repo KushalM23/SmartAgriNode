@@ -4,25 +4,26 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 
 ## Features
 
-- **User Authentication**: Secure authentication with Clerk (OAuth, social login, magic links)
+- **User Authentication**: Secure authentication with Supabase Auth (Email/Password)
+- **Account Management**: Profile management with avatar upload and detailed history view
 - **Crop Recommendation**: AI-powered crop suggestions based on soil and environmental parameters
 - **Weed Detection**: Advanced image processing to identify weeds in agricultural images
-- **Dashboard**: A web dashboard for viewing all the insights about the soil and climate conditions
+- **Dashboard**: Interactive web dashboard for viewing soil and climate insights
 - **User History**: Automatic tracking of recommendations and detections (stored in Supabase)
 
 ## Technology Stack
 
 ### Backend
 - **Framework:** FastAPI (async Python web framework)
-- **Authentication:** Clerk (JWT-based authentication)
+- **Authentication:** Supabase Auth (JWT-based authentication)
 - **Database:** Supabase (PostgreSQL cloud database)
 - **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch
 
 ### Frontend
 - **Framework:** React.js with Vite
-- **Authentication:** Clerk React SDK
+- **Authentication:** Supabase JS Client
 - **HTTP Client:** Fetch API
-- **Dependencies:** React Router, ApexCharts
+- **Dependencies:** React Router, ApexCharts, GSAP
 
 ## Project Structure
 
@@ -47,8 +48,9 @@ SmartAgriNode/
 ├── frontend-react/              # React + Vite frontend
 │   ├── src/
 │   │   ├── Components/          # React components
+│   │   ├── Context/             # React Context (AuthContext)
 │   │   ├── lib/                 # API utilities
-│   │   ├── App.jsx              # Main app with Clerk provider
+│   │   ├── App.jsx              # Main app with Auth provider
 │   │   └── main.jsx
 │   ├── package.json
 │   ├── vite.config.js
@@ -56,31 +58,27 @@ SmartAgriNode/
 ├── test_images/                 # Sample images for testing
 ├── .env.example                 # Backend environment template
 ├── requirements.txt             # Python backend dependencies
-├── setup_database.py            # Database setup helper script
 ├── start_servers.py             # Start both servers together
-├── SETUP_V2.md                  # Detailed setup instructions
-├── UPGRADE_SUMMARY.md           # v2.0 upgrade documentation
 ├── PRD.md                       # Product Requirements Document
 └── README.md                    # This file
 ```
 
 ## Quick Start
 1. Clone the repository
-2. Set up Clerk & Supabase accounts
+2. Set up Supabase project
 3. Configure environment variables (.env files)
 4. Create & activate Python virtual environment
 5. Install backend dependencies (`pip install -r requirements.txt`)
 6. Run database schema in Supabase SQL Editor
 7. Start servers (`python start_servers.py`)
 
-**Detailed setup instructions available in [SETUP_V2.md](SETUP_V2.md)**
 
 ## Setup Instructions
 
 ### 1. Clone repo:
 ```bash
-   git clone https://github.com/KushalM23/SmartAgriNode.git
-   cd SmartAgriNode
+git clone https://github.com/KushalM23/SmartAgriNode.git
+cd SmartAgriNode
 ```
 
 ### 2. Configure Environment Variables:
@@ -89,10 +87,7 @@ SmartAgriNode/
 ```bash
 cp .env.example .env
 # Edit .env and add:
-# - CLERK_SECRET_KEY (from Clerk dashboard)
-# - CLERK_PUBLISHABLE_KEY (from Clerk dashboard)
 # - SUPABASE_URL (from Supabase project settings)
-# - SUPABASE_ANON_KEY (from Supabase project settings)
 # - SUPABASE_SERVICE_ROLE_KEY (from Supabase project settings)
 ```
 
@@ -101,22 +96,19 @@ cp .env.example .env
 cd frontend-react
 cp .env.example .env
 # Edit .env and add:
-# - VITE_CLERK_PUBLISHABLE_KEY (from Clerk dashboard)
+# - VITE_SUPABASE_URL (from Supabase project settings)
+# - VITE_SUPABASE_ANON_KEY (from Supabase project settings)
 cd ..
 ```
 
-### 3. Setup Supabase Database:
+### 3. Setup Supabase Database & Auth:
 - Create a Supabase project at https://supabase.com
 - Go to SQL Editor and run the schema from `backend/supabase_schema.sql`
-- Copy your project URL, anon key, and service role key to `.env`
-- Note: You can also run `python setup_database.py` for setup verification
+- Enable Email/Password provider in Authentication settings
+- Create a storage bucket named `avatars` (public) for profile pictures
+- Copy your project URL, anon key, and service role key to `.env` files
 
-### 4. Setup Clerk Authentication:
-- Create a Clerk application at https://clerk.com
-- Enable desired authentication methods (email, Google, etc.)
-- Copy your publishable key and secret key to `.env` files
-
-### 5. Create and activate Python venv:
+### 4. Create and activate Python venv:
 ```bash
 python -m venv venv
 source venv/bin/activate   # macOS / Linux
@@ -124,12 +116,12 @@ source venv/bin/activate   # macOS / Linux
 venv\Scripts\activate      # Windows
 ```
 
-### 6. Install backend dependencies:
+### 5. Install backend dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 7. Start servers:
+### 6. Start servers:
 ```bash
 python start_servers.py
 ```
@@ -148,9 +140,16 @@ Once running at http://localhost:5173:
 
 ### Sign Up / Log In
 - Click "Sign In" in the navigation
-- Sign up with email or social providers (Google, GitHub, etc.)
-- Clerk handles all authentication securely
+- Sign up with email and password
+- Supabase Auth handles authentication securely
 - After login, you'll be redirected to the Dashboard
+
+### Account Management
+- Click your avatar/username in the navigation bar
+- Upload or change your profile picture
+- View your complete history of recommendations and detections
+- Click on crop recommendations to see detailed input parameters
+- Logout from your account
 
 ### Crop Recommendation
 - Navigate to the "Crop Recommendation" page (requires authentication)
@@ -174,7 +173,6 @@ Once running at http://localhost:5173:
 - Monitor temperature, humidity, and rainfall with radial gauges
 - Track soil pH levels with line charts
 - View NPK (Nitrogen, Phosphorus, Potassium) values with bar charts
-- Access your recommendation and detection history (coming soon)
 
 ## API Endpoints
 
@@ -183,19 +181,19 @@ Once running at http://localhost:5173:
 - `GET /api/health` - Check backend server and ML model status
 
 ### Authentication
-Authentication is handled by Clerk. All protected endpoints require a valid Clerk JWT token in the `Authorization: Bearer <token>` header.
+Authentication is handled by Supabase. All protected endpoints require a valid Supabase JWT token in the `Authorization: Bearer <token>` header.
 
 ### Machine Learning (Protected)
 - `POST /api/crop-recommendation` - Submit soil and climate data for crop recommendations
-  - Requires: Authorization header with Clerk token
+  - Requires: Authorization header with Supabase token
   - Body: JSON with N, P, K, temperature, humidity, ph, rainfall
 - `POST /api/weed-detection` - Upload image for weed detection
-  - Requires: Authorization header with Clerk token
+  - Requires: Authorization header with Supabase token
   - Body: Multipart form-data with image file
 
 ### User History (Protected)
 - `GET /api/history` - Retrieve user's crop recommendations and weed detections history
-  - Requires: Authorization header with Clerk token
+  - Requires: Authorization header with Supabase token
   - Returns: JSON with crop_recommendations and weed_detections arrays
 
 ### API Documentation
@@ -237,7 +235,7 @@ npm install
 npm run dev
 ```
 - Check console logs for React errors
-- Verify `.env` file exists in `frontend-react/` with correct Clerk key
+- Verify `.env` file exists in `frontend-react/` with correct Supabase keys
 
 ### Backend not responding
 - Run manually:
@@ -257,13 +255,14 @@ python -m uvicorn main:app --reload --port 5000
 - Visit http://localhost:5000/api/health to verify model status
 
 ### Authentication errors
-- Verify Clerk keys are correct in `.env` files
-- Ensure `CLERK_PUBLISHABLE_KEY` matches in both backend and frontend `.env`
-- Check Clerk dashboard for any issues
+- Verify Supabase keys are correct in `.env` files
+- Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set in frontend `.env`
+- Ensure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set in backend `.env`
+- Check Supabase dashboard for any issues
 - Restart both servers after changing environment variables
 
 ### Database connection errors
-- Verify Supabase URL and keys are correct in `.env`
+- Verify Supabase URL and Service Role Key are correct in backend `.env`
 - Check Supabase project is active (not paused)
 - Ensure database schema was executed successfully in SQL Editor
 - Check Supabase dashboard logs for errors
@@ -279,8 +278,6 @@ Open manually at:
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 - API Docs: http://localhost:5000/api/docs
-
-For more detailed troubleshooting, see [SETUP_V2.md](SETUP_V2.md)
 
 ## Contributing
 

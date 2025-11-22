@@ -1,47 +1,36 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from 'react';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { AuthProvider, useAuth } from './Context/AuthContext';
 import NavBar from "./Components/NavBar";
-const Home = lazy(() => import('./Components/Home'));
-const Dashboard = lazy(() => import('./Components/Dashboard'));
-const CropRecommendation = lazy(() => import('./Components/CropRecommendation'));
-const WeedDetection = lazy(() => import('./Components/WeedDetection'));
-const SignInPage = lazy(() => import('./Components/SignInPage'));
-const SignUpPage = lazy(() => import('./Components/SignUpPage'));
 import './App.css';
 
 import DotGrid from './Components/DotGrid';
 
-// Get Clerk publishable key from environment
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!CLERK_PUBLISHABLE_KEY) {
-  console.error('Missing Clerk Publishable Key. Add VITE_CLERK_PUBLISHABLE_KEY to your .env file');
-}
+const Home = lazy(() => import('./Components/Home'));
+const Dashboard = lazy(() => import('./Components/Dashboard'));
+const CropRecommendation = lazy(() => import('./Components/CropRecommendation'));
+const WeedDetection = lazy(() => import('./Components/WeedDetection'));
+const SignIn = lazy(() => import('./Components/SignIn'));
+const SignUp = lazy(() => import('./Components/SignUp'));
+const Account = lazy(() => import('./Components/Account'));
 
 function ProtectedRoute({ children }) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <RedirectToSignIn signInUrl="/sign-in" />
-      </SignedOut>
-    </>
-  );
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div style={{ padding: 24 }}>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
-  if (!CLERK_PUBLISHABLE_KEY) {
-    return (
-      <div className="app" style={{ padding: 24 }}>
-        <h1>Authentication not configured</h1>
-        <p>Please set the VITE_CLERK_PUBLISHABLE_KEY environment variable to enable Clerk.</p>
-      </div>
-    );
-  }
-
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+    <AuthProvider>
       <BrowserRouter>
         <div className="app">
           <div className="app-background">
@@ -62,8 +51,8 @@ export default function App() {
             <Suspense fallback={<div style={{ padding: 24 }}>Loading…</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/sign-in/*" element={<SignInPage />} />
-                <Route path="/sign-up/*" element={<SignUpPage />} />
+                <Route path="/sign-in" element={<SignIn />} />
+                <Route path="/sign-up" element={<SignUp />} />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
@@ -79,11 +68,16 @@ export default function App() {
                     <WeedDetection />
                   </ProtectedRoute>
                 } />
+                <Route path="/account" element={
+                  <ProtectedRoute>
+                    <Account />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </Suspense>
           </div>
         </div>
       </BrowserRouter>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }
