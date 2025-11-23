@@ -349,8 +349,6 @@ export default function Dashboard() {
           />
         </div>
       </div>
-
-      <History />
     </div>
   );
 }

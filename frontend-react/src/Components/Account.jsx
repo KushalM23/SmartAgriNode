@@ -28,12 +28,25 @@ export default function Account() {
 
     const fetchProfile = async () => {
         try {
-            // Check if user has an avatar in metadata
-            if (user.user_metadata?.avatar_url) {
+            // Try to fetch from public.users table first for most up-to-date data
+            const { data, error } = await supabase
+                .from('users')
+                .select('avatar_url')
+                .eq('user_id', user.id)
+                .single();
+
+            if (data && data.avatar_url) {
+                setAvatarUrl(data.avatar_url);
+            } else if (user.user_metadata?.avatar_url) {
+                // Fallback to metadata if table fetch fails or is empty
                 setAvatarUrl(user.user_metadata.avatar_url);
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
+            // Fallback to metadata
+            if (user.user_metadata?.avatar_url) {
+                setAvatarUrl(user.user_metadata.avatar_url);
+            }
         }
     };
 
@@ -82,11 +95,22 @@ export default function Account() {
             if (!confirm('Are you sure you want to remove your profile picture?')) return;
 
             setUploading(true);
-            const { error } = await supabase.auth.updateUser({
-                data: { avatar_url: null }
+            
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const token = session?.access_token;
+
+            const response = await fetch(`${API_URL}/api/delete-avatar`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
-            if (error) throw error;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to delete avatar');
+            }
 
             setAvatarUrl(null);
             setShowAvatarMenu(false);
@@ -107,38 +131,35 @@ export default function Account() {
             }
 
             const file = event.target.files[0];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user.id}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const formData = new FormData();
+            formData.append('file', file);
 
-            // Upload to Supabase Storage
-            // Note: This assumes a 'avatars' bucket exists and is public
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, file, { upsert: true });
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const token = session?.access_token;
 
-            if (uploadError) {
-                throw uploadError;
-            }
-
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
-
-            // Update user metadata
-            const { error: updateError } = await supabase.auth.updateUser({
-                data: { avatar_url: publicUrl }
+            const response = await fetch(`${API_URL}/api/upload-avatar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
             });
 
-            if (updateError) {
-                throw updateError;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to upload avatar');
             }
 
-            setAvatarUrl(publicUrl);
+            const data = await response.json();
+            setAvatarUrl(data.avatar_url);
+            
+            // Update local user metadata if needed, though the backend handles the DB update
+            // We might want to refresh the session or user object if possible, 
+            // but setting avatarUrl state is enough for immediate UI update.
+            
         } catch (error) {
             console.error('Error uploading avatar:', error);
-            alert('Error uploading avatar. Make sure "avatars" bucket exists and is public.');
+            alert(`Error uploading avatar: ${error.message}`);
         } finally {
             setUploading(false);
         }

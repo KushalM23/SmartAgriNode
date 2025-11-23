@@ -29,6 +29,12 @@ def start_backend():
     global backend_process
     logger.info("🚀 Starting Backend Server (FastAPI)...")
     try:
+        # Check and install Python dependencies
+        if os.path.exists(os.path.join(BACKEND_DIR, 'requirements.txt')):
+            logger.info("📦 Checking backend dependencies...")
+            subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], 
+                         cwd=BACKEND_DIR, check=True, capture_output=True)
+
         # Start the backend with uvicorn
         backend_process = subprocess.Popen(
             [sys.executable, '-m', 'uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '5000', '--reload'],

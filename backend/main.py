@@ -12,7 +12,7 @@ from typing import Optional
 import cv2
 import joblib
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -140,6 +140,11 @@ class HistoryResponse(BaseModel):
     crop_recommendations: list
     weed_detections: list
 
+class AvatarResponse(BaseModel):
+    """Response model for avatar upload"""
+    avatar_url: str
+    message: str
+
 # Supabase JWT verification
 async def verify_supabase_token(authorization: Optional[str] = Header(None)) -> dict:
     """
@@ -158,17 +163,20 @@ async def verify_supabase_token(authorization: Optional[str] = Header(None)) -> 
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     
     # Verify token using Supabase client
-    user = await SupabaseDB.verify_jwt(token)
-    
-    if user:
-        logger.info("Token verified for user %s", user.id)
-        return {
-            "user_id": user.id,
-            "email": user.email
-        }
-    else:
-        # Development fallback (optional, remove in strict production)
-        # logger.warning("Token verification failed")
+    try:
+        user = await SupabaseDB.verify_jwt(token)
+        
+        if user:
+            logger.info("Token verified for user %s", user.id)
+            return {
+                "user_id": user.id,
+                "email": user.email
+            }
+        else:
+            logger.warning("Token verification failed: verify_jwt returned None")
+            raise HTTPException(status_code=401, detail="Invalid token or expired session")
+    except Exception as e:
+        logger.error(f"Token verification error: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid token or expired session")
 
 # API Routes
@@ -374,6 +382,84 @@ async def weed_detection(
         if 'output_path' in locals() and os.path.exists(output_path):
             os.remove(output_path)
         raise HTTPException(status_code=400, detail=f"Weed detection failed: {str(e)}")
+
+@app.post(
+    "/api/upload-avatar",
+    response_model=AvatarResponse,
+    responses={
+        400: {"model": ErrorResponse},
+        401: {"model": ErrorResponse},
+        500: {"model": ErrorResponse}
+    }
+)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    user: dict = Depends(verify_supabase_token)
+):
+    """
+    Upload user avatar
+    Requires authentication
+    Accepts JPG, PNG, JPEG formats (max 5MB)
+    """
+    # Validate file type
+    allowed_extensions = {'jpg', 'jpeg', 'png'}
+    file_ext = file.filename.split('.')[-1].lower() if '.' in file.filename else ''
+    
+    if file_ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Invalid file format. Allowed: JPG, PNG, GIF, WEBP")
+    
+    # Validate file size (5MB max)
+    max_size = 5 * 1024 * 1024
+    contents = await file.read()
+    if len(contents) > max_size:
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
+    
+    try:
+        avatar_url = await SupabaseDB.upload_avatar(
+            user_id=user.get("user_id"),
+            file_content=contents,
+            file_ext=file_ext
+        )
+        
+        return AvatarResponse(
+            avatar_url=avatar_url,
+            message="Avatar uploaded successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Avatar upload failed: {str(e)}")
+
+@app.delete(
+    "/api/delete-avatar",
+    response_model=AvatarResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        500: {"model": ErrorResponse}
+    }
+)
+async def delete_avatar(
+    background_tasks: BackgroundTasks,
+    user: dict = Depends(verify_supabase_token)
+):
+    """
+    Delete user avatar
+    Requires authentication
+    Clears DB reference immediately, deletes file in background
+    """
+    try:
+        user_id = user.get("user_id")
+        
+        # 1. Clear DB reference immediately
+        await SupabaseDB.clear_avatar_reference(user_id)
+        
+        # 2. Schedule file deletion in background
+        background_tasks.add_task(SupabaseDB.delete_avatar_file, user_id)
+        
+        return AvatarResponse(
+            avatar_url="",
+            message="Avatar deleted successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Avatar deletion failed: {str(e)}")
 
 # Error handlers
 @app.exception_handler(HTTPException)
