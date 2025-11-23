@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
 import History from './History';
+import { useTheme } from '../Context/ThemeContext';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('temperature');
+  const { theme } = useTheme();
 
   const sharedGradient = {
     type: 'gradient',
     gradient: {
-      shade: 'light',
+      shade: theme === 'dark' ? 'dark' : 'light',
       type: 'horizontal',
       shadeIntensity: 0.15,
       gradientToColors: ['#ff8f89'],
@@ -20,13 +22,13 @@ export default function Dashboard() {
       colorStops: [
         {
           offset: 0,
-          color: '#E01709',
+          color: 'var(--primary-color)',
           opacity: 1
         },
         {
           offset: 100,
-          color: '#ff8f89',
-          opacity: 0.8
+          color: 'var(--primary-color)',
+          opacity: 1
         }
       ]
     }
@@ -48,7 +50,8 @@ export default function Dashboard() {
       type: 'bar',
       height: 200,
       toolbar: { show: false },
-      background: 'transparent'
+      background: 'transparent',
+      foreColor: 'var(--text-color)'
     },
     plotOptions: {
       bar: {
@@ -65,26 +68,74 @@ export default function Dashboard() {
         colors: ['#fff']
       }
     },
-    colors: ['#E01709'],
+    colors: ['var(--primary-color)'],
     xaxis: {
       categories: ['Nitrogen', 'Phosphorus', 'Potassium'],
       labels: {
         style: {
-          fontSize: '12px'
+          fontSize: '12px',
+          colors: 'var(--text-color)'
         }
+      },
+      axisBorder: {
+        show: true,
+        color: 'var(--input-border)'
+      },
+      axisTicks: {
+        show: true,
+        color: 'var(--input-border)'
       }
     },
     yaxis: {
       title: { text: 'Value' },
       min: 0,
       max: 200,
-      tickAmount: 5
+      tickAmount: 5,
+      labels: {
+        style: {
+          colors: 'var(--text-color)'
+        }
+      }
     },
     grid: {
-      borderColor: '#f1f1f1'
+      borderColor: 'var(--input-border)'
     },
     legend: {
       show: false
+    },
+    tooltip: {
+      theme: theme, // This sets the base theme (light/dark)
+      style: {
+        fontSize: '12px',
+        fontFamily: undefined
+      },
+      // You can override specific colors here if the theme isn't enough
+      onDatasetHover: {
+        highlightDataSeries: true,
+      },
+      x: {
+        show: true,
+        format: 'dd MMM',
+        formatter: undefined,
+      },
+      y: {
+        formatter: undefined,
+        title: {
+          formatter: (seriesName) => seriesName,
+        },
+      },
+      marker: {
+        show: true,
+      },
+      items: {
+         display: 'flex',
+      },
+      fixed: {
+        enabled: false,
+        position: 'topRight',
+        offsetX: 0,
+        offsetY: 0,
+      },
     }
   };
 
@@ -108,14 +159,14 @@ export default function Dashboard() {
         hollow: {
           margin: 0,
           size: '75%',
-          background: '#fff',
+          background: 'var(--card-bg)',
           dropShadow: {
             enabled: true,
             opacity: 0.1
           }
         },
         track: {
-          background: '#f1f1f1',
+          background: 'var(--input-border)',
           strokeWidth: '100%',
           dropShadow: {
             enabled: true,
@@ -125,16 +176,16 @@ export default function Dashboard() {
         dataLabels: {
           show: true,
           name: {
-            show: true,
+            show: false,
             fontSize: '14px',
-            color: '#666',
+            color: 'var(--primary-color)',
             offsetY: 20
           },
           value: {
             show: true,
             fontSize: '24px',
-            color: '#E01709',
-            offsetY: -20,
+            color: 'var(--primary-color)',
+            offsetY: 0,
             formatter: function () {
               return farmData.temperature.toFixed(1) + '°C';
             }
@@ -160,17 +211,19 @@ export default function Dashboard() {
       background: 'transparent',
       animations: {
         enabled: false
-      }
+      },
+      foreColor: 'var(--text-color)'
     },
+    colors: ['var(--primary-color)'],
     stroke: {
       show: true,
       curve: 'straight',
       width: 2,
-      colors: ['#E01709']
+      colors: ['var(--primary-color)']
     },
     markers: {
       size: 5,
-      colors: ['#E01709'],
+      colors: ['var(--primary-color)'],
       strokeWidth: 0,
       hover: {
         size: 7
@@ -178,7 +231,7 @@ export default function Dashboard() {
     },
     grid: {
       show: true,
-      borderColor: '#f1f1f1',
+      borderColor: 'var(--input-border)',
       strokeDashArray: 3,
       position: 'back',
       padding: {
@@ -197,7 +250,7 @@ export default function Dashboard() {
       tickAmount: 5,
       labels: {
         style: {
-          colors: '#666',
+          colors: 'var(--text-color)',
           fontSize: '12px'
         },
         formatter: (value) => value.toFixed(1)
@@ -207,16 +260,24 @@ export default function Dashboard() {
       categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       labels: {
         style: {
-          colors: '#666',
+          colors: 'var(--text-color)',
           fontSize: '12px'
         }
+      },
+      axisBorder: {
+        show: true,
+        color: 'var(--input-border)'
+      },
+      axisTicks: {
+        show: true,
+        color: 'var(--input-border)'
       }
     },
     annotations: {
       yaxis: []
     },
     tooltip: {
-      theme: 'light',
+      theme: theme,
       y: {
         formatter: function (val) {
           return val.toFixed(1) + ' pH';
@@ -229,7 +290,7 @@ export default function Dashboard() {
   const phChartSeries = [{
     name: 'pH Level',
     type: 'line',
-    data: [6.3, 6.5, 6.7, farmData.pH, 6.6, 6.4, 6.5].map(val => parseFloat(val.toFixed(1))),
+    data: [6.3, 5.3, 6.7, farmData.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
   }];
 
   return (

@@ -1,6 +1,6 @@
 .dashboard-container {
   width: 100%;
-  padding: 2rem;
+  padding: 0;
 }
 
 .dashboard-grid {
@@ -12,26 +12,22 @@
 }
 
 .dashboard-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 6px var(--shadow-color);
   text-align: center;
   min-height: 320px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--input-border);
 }
 
-.dashboard-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(224, 23, 9, 0.08);
-}
 
 .dashboard-card h3 {
-  color: #E01709;
+  color: var(--primary-color);
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
   font-weight: 600;
@@ -39,14 +35,14 @@
 }
 
 .data-label {
-  color: #666;
+  color: var(--primary-color);
   font-size: 0.95rem;
   margin-top: auto;
   font-weight: 500;
 }
 
 .rainfall-label {
-  color: #666;
+  color: var(--primary-color);
   font-size: 0.95rem;
   margin-top: 0.5rem;
   font-weight: 500;
@@ -54,7 +50,7 @@
 
 .metrics-card {
   grid-row: span 1;
-  background: linear-gradient(to bottom right, #fff, #f8f9fa);
+  background: var(--card-bg);
 }
 
 .metrics-content {
@@ -67,7 +63,7 @@
 
 .ph-card {
   grid-row: span 1;
-  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  background: var(--card-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -80,7 +76,7 @@
 
 .npk-card {
   grid-column: span 2;
-  background: linear-gradient(to bottom right, #fff, #f8f9fa);
+  background: var(--card-bg);
 }
 
 /* Tab styles */
@@ -89,10 +85,10 @@
   align-items: center;
   gap: 0;
   padding: 4px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 4px var(--shadow-color);
   overflow: hidden;
 }
 
@@ -100,10 +96,10 @@
   padding: 10px 18px;
   border: 0;
   background: transparent;
-  color: #6c757d;
+  color: var(--secondary-color);
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: 8px;
   transition: all 0.3s ease;
   position: relative;
@@ -112,12 +108,11 @@
 }
 
 .tab:hover {
-  background: rgba(224, 23, 9, 0.05);
-  color: #E01709;
+  color: var(--primary-color);
 }
 
 .tab.active {
-  background: #E01709;
+  background: var(--primary-color);
   color: #fff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(224, 23, 9, 0.3);
@@ -137,7 +132,7 @@
 .circular-progress .data-label {
   font-size: 1rem;
   font-weight: 500;
-  color: var(--secondary-color, #4a5568);
+  color: var(--secondary-color);
   margin-top: 0.5rem;
 }
 
@@ -145,22 +140,44 @@
 .circular-progress .apexcharts-datalabel-label {
   font-size: 0.875rem !important;
   font-weight: 500 !important;
-  fill: var(--secondary-color, #4a5568) !important;
+  fill: var(--card-bg) !important;
 }
 
 .circular-progress .apexcharts-datalabel-value {
   font-size: 1.25rem !important;
   font-weight: 600 !important;
-  fill: var(--primary-color, #E01709) !important;
+  fill: var(--primary-color) !important;
 }
 
 .dashboard-container h1 {
-  color: #333;
+  color: var(--heading-color);
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   letter-spacing: -0.5px;
   text-align: center;
+}
+
+.apexcharts-tooltip {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  box-shadow: 0 4px 6px var(--shadow-color) !important;
+  color: var(--text-color) !important;
+}
+
+.apexcharts-tooltip-title {
+  background-color: var(--bg-color) !important; 
+  border-bottom: 1px solid var(--input-border) !important;
+  font-family: inherit !important;
+}
+
+.apexcharts-tooltip-text {
+  color: var(--text-color) !important;
+}
+
+.apexcharts-tooltip-text-y-value,
+.apexcharts-tooltip-text-z-value {
+  color: var(--text-color) !important; 
 }
 
 @media (max-width: 768px) {

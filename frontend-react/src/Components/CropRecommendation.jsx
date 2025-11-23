@@ -93,9 +93,7 @@ export default function CropRecommendation() {
                   required
                 />
               </div>
-            </div>
 
-            <div className="form-row">
               <div className="form-group">
                 <label>Potassium (K)</label>
                 <input
@@ -111,7 +109,9 @@ export default function CropRecommendation() {
                   required
                 />
               </div>
+            </div>
 
+            <div className="form-row">
               <div className="form-group">
                 <label>Temperature (°C)</label>
                 <input
@@ -127,9 +127,7 @@ export default function CropRecommendation() {
                   required
                 />
               </div>
-            </div>
 
-            <div className="form-row">
               <div className="form-group">
                 <label>Humidity (%)</label>
                 <input

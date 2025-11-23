@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './Context/AuthContext';
+import { ThemeProvider, useTheme } from './Context/ThemeContext';
 import NavBar from "./Components/NavBar";
+import Footer from "./Components/Footer";
 import './App.css';
 
 import DotGrid from './Components/DotGrid';
@@ -28,56 +30,69 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function AppContent() {
+  const { theme } = useTheme();
+
+  return (
+    <BrowserRouter>
+      <div className="app">
+        <div className="app-background">
+          <DotGrid
+            dotSize={6}
+            gap={20}
+            /* Change baseColor to update the background dot color based on theme */
+            baseColor={theme === 'dark' ? '#161616' : '#edececff'}
+            /* Change activeColor to update the dot color on hover based on theme */
+            activeColor={'#e017095c'}
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
+          />
+        </div>
+        <NavBar />
+        <div className="content-wrapper">
+          <Suspense fallback={<div style={{ padding: 24 }}>Loading…</div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/crop-recommendation" element={
+                <ProtectedRoute>
+                  <CropRecommendation />
+                </ProtectedRoute>
+              } />
+              <Route path="/weed-detection" element={
+                <ProtectedRoute>
+                  <WeedDetection />
+                </ProtectedRoute>
+              } />
+              <Route path="/account" element={
+                <ProtectedRoute>
+                  <Account />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </Suspense>
+        </div>
+        <Footer />
+      </div>
+    </BrowserRouter>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <div className="app">
-          <div className="app-background">
-            <DotGrid
-              dotSize={6}
-              gap={20}
-              baseColor="#edececff"
-              activeColor="#ff2727"
-              proximity={120}
-              shockRadius={250}
-              shockStrength={5}
-              resistance={750}
-              returnDuration={1.5}
-            />
-          </div>
-          <NavBar />
-          <div className="content-wrapper">
-            <Suspense fallback={<div style={{ padding: 24 }}>Loading…</div>}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/sign-in" element={<SignIn />} />
-                <Route path="/sign-up" element={<SignUp />} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/crop-recommendation" element={
-                  <ProtectedRoute>
-                    <CropRecommendation />
-                  </ProtectedRoute>
-                } />
-                <Route path="/weed-detection" element={
-                  <ProtectedRoute>
-                    <WeedDetection />
-                  </ProtectedRoute>
-                } />
-                <Route path="/account" element={
-                  <ProtectedRoute>
-                    <Account />
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </Suspense>
-          </div>
-        </div>
-      </BrowserRouter>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

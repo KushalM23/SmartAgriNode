@@ -208,9 +208,6 @@ export default function Account() {
                 </div>
 
                 <div className="profile-actions">
-                    <button className="icon-button" onClick={() => { /* Theme toggle logic later */ }}>
-                        <img src={moonIcon} alt="Toggle Theme" />
-                    </button>
                     <button className="icon-button" onClick={handleLogout}>
                         <img src={logOutIcon} alt="Logout" />
                     </button>

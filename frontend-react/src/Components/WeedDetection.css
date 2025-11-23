@@ -6,47 +6,63 @@
 }
 
 .upload-section {
-  background: white;
+  background: var(--card-bg);
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   width: 100%;
-  max-width: 720px;
+  max-width: 1200px;
   margin: 0 auto;
+  border: 1px solid var(--input-border);
 }
 
 .upload-section h3 {
-  color: #333;
+  color: var(--heading-color);
   margin-bottom: 0rem;
   font-size: 1.5rem;
 }
 
+.upload-row {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
 .upload-box {
-  border: 2px dashed #ddd;
+  flex: 1;
+  border: 2px dashed var(--input-border);
   border-radius: 10px;
   padding: 3rem 2rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s ease;
+  background-color: var(--input-bg);
 }
 
 .upload-box:hover {
-  border-color: #E01709;
+  /* Change border-color to update the upload box hover color */
+  border-color: var(--primary-color);
 }
 
 .upload-icon {
-  color: #E01709;
+  /* Change color to update the upload icon color */
+  color: var(--primary-color);
   margin-bottom: 1rem;
 }
 
 
 .upload-or {
-  color: #888;
+  color: var(--text-color);
   margin: 0.5rem 0;
 }
 
+.upload-text {
+  color: var(--text-color);
+}
+
 .browse-button {
-  background: #E01709;
+  /* Change background to update the browse button color */
+  background: var(--primary-color);
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -61,15 +77,19 @@
 }
 
 .preview-card {
-  margin-top: 1rem;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: var(--card-bg);
+  padding: 0;
+  border-radius: 10px;
+  box-shadow: none;
 }
 .preview-img {
   width: 100%;
   border-radius: 10px;
-  border: 1px solid #eee;
+  border: 1px solid var(--input-border);
 }
 
 .result-container {
@@ -80,7 +100,8 @@
 }
 
 .weed-count {
-  background: #E01709;
+  /* Change background to update the weed count badge color */
+  background: var(--primary-color);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -91,17 +112,23 @@
 
 .result-card {
   margin-top: 1rem;
-  background: white;
+  background: var(--card-bg);
   padding: 1.25rem;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  border: 1px solid var(--input-border);
 }
-.result-row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px dashed #eee; }
+.result-row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px dashed var(--input-border); }
 .result-row:first-of-type { border-top: 0; }
-.label { color: #555; }
-.value { color: #E01709; font-weight: 600; }
+.label { color: var(--text-color); }
+.value { 
+  /* Change color to update the result value color */
+  color: var(--primary-color); 
+  font-weight: 600; 
+}
 
 
 @media (max-width: 768px) {
   .upload-section { padding: 1.25rem; }
+  .upload-row { flex-direction: column; }
 }

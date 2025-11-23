@@ -1,11 +1,68 @@
+:root {
+  /* Global Colors */
+  --primary-color: #E01709;
+  --secondary-color: #4a5568;
+  --font-family: Alan Sans;
+
+  /* Light Mode Colors - Change these values to update the light theme */
+  --bg-color: rgb(242, 242, 242);
+  --text-color: #333;
+  --card-bg: #fff;
+  --input-bg: #fff;
+  --input-border: #ddd;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --heading-color: #1a1a1a;
+  
+  /* Navbar & UI Specific */
+  --nav-bg: #ffffff;
+  --nav-text: #4a5568;
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --button-bg: #ffffff;
+  --button-border: #eee;
+  --button-text: #E01709;
+}
+
+[data-theme='dark'] {
+  /* Dark Mode Colors - Change these values to update the dark theme */
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1a1a1a;
+  --input-bg: #222222;
+  --input-border: #232323;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --heading-color: #ffffff; 
+  --secondary-color: #595959;
+
+  /* Navbar & UI Specific */
+  --nav-bg: #1a1a1a;
+  --nav-text: #e0e0e0;
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --button-bg: #2d2d2d;
+  --button-border: #333333;
+  --button-text: #E01709;
+}
+
 body{
     margin: 0;
     padding: 0;
     font-family: Alan Sans;
-    background-color: rgb(230, 222, 222);
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 a{
     text-decoration: none;
-    color: rgb(230, 222, 222);
+    color: inherit;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
