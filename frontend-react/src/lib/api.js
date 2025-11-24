@@ -1,10 +1,12 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL 
+  ? (import.meta.env.VITE_API_URL.endsWith('/api') ? import.meta.env.VITE_API_URL : `${import.meta.env.VITE_API_URL}/api`)
+  : '/api';
 
 /**
- * Make authenticated API request with Clerk token
+ * Make authenticated API request with Supabase token
  * @param {string} path - API endpoint path
  * @param {object} options - Fetch options
- * @param {string} token - Clerk authentication token
+ * @param {string} token - Supabase authentication token
  */
 async function request(path, options = {}, token = null) {
     const headers = {
@@ -12,7 +14,7 @@ async function request(path, options = {}, token = null) {
         ...(options.headers || {})
     };
 
-    // Add Clerk token if provided
+    // Add Supabase token if provided
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
@@ -38,7 +40,7 @@ export const api = {
     // Health check (no auth required)
     healthCheck: () => request('/health', { method: 'GET' }),
 
-    // ML endpoints (require Clerk token)
+    // ML endpoints (require Supabase token)
     cropRecommendation: (payload, token) => 
         request('/crop-recommendation', { 
             method: 'POST', 
@@ -66,7 +68,32 @@ export const api = {
         return data;
     },
 
-    // User history (requires Clerk token)
-    history: (token) => request('/history', { method: 'GET' }, token)
+    // User history (requires Supabase token)
+    history: (token, limit = 10) => request(`/history?limit=${limit}`, { method: 'GET' }, token),
+    
+    // Avatar operations
+    uploadAvatar: async (file, token) => {
+        const form = new FormData();
+        form.append('file', file);
+        
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${API_BASE}/upload-avatar`, {
+            method: 'POST',
+            credentials: 'include',
+            headers,
+            body: form
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || res.statusText);
+        return data;
+    },
+
+    deleteAvatar: (token) => request('/delete-avatar', { method: 'DELETE' }, token)
 };
+
 

@@ -176,13 +176,14 @@ class SupabaseDB:
             data = {
                 "user_id": user_id,
                 "image_filename": filename,
-                "weed_count": detections
+                "weed_count": int(detections)
             }
             
             result = supabase.table("weed_detections").insert(data).execute()
             return result.data[0] if result.data else {}
-        except Exception:
+        except Exception as e:
             logger.exception("Error storing weed detection")
+            print(f"Error storing weed detection: {str(e)}")
             return {}
     
     @staticmethod

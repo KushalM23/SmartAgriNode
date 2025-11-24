@@ -245,13 +245,14 @@ async def crop_recommendation(
     
     try:
         # Ensure user metadata exists (idempotent upsert)
-        try:
-            await SupabaseDB.store_user_metadata(
-                user_id=user.get("user_id") or "dev_user",
-                email=user.get("email") or "dev@example.com"
-            )
-        except Exception:
-            logger.warning("Failed to upsert user metadata", exc_info=True)
+        if user.get("user_id"):
+            try:
+                await SupabaseDB.store_user_metadata(
+                    user_id=user.get("user_id"),
+                    email=user.get("email")
+                )
+            except Exception as e:
+                logger.warning(f"Failed to upsert user metadata: {e}")
 
         # Extract features in the correct order
         features = [
@@ -268,15 +269,16 @@ async def crop_recommendation(
         prediction = model.predict([features])[0]
         
         # Store in history (optional, non-blocking)
-        try:
-            await SupabaseDB.store_crop_recommendation(
-                user_id=user.get("user_id"),
-                input_data=data.dict(),
-                recommendation=str(prediction),
-                confidence=0.95
-            )
-        except Exception:
-            logger.warning("Failed to store crop recommendation history", exc_info=True)
+        if user.get("user_id"):
+            try:
+                await SupabaseDB.store_crop_recommendation(
+                    user_id=user.get("user_id"),
+                    input_data=data.dict(),
+                    recommendation=str(prediction),
+                    confidence=0.95
+                )
+            except Exception as e:
+                logger.warning(f"Failed to store crop recommendation history: {e}")
         
         return CropRecommendationResponse(
             recommended_crop=str(prediction),
@@ -322,13 +324,14 @@ async def weed_detection(
     
     try:
         # Ensure user metadata exists (idempotent upsert)
-        try:
-            await SupabaseDB.store_user_metadata(
-                user_id=user.get("user_id") or "dev_user",
-                email=user.get("email") or "dev@example.com"
-            )
-        except Exception:
-            logger.warning("Failed to upsert user metadata", exc_info=True)
+        if user.get("user_id"):
+            try:
+                await SupabaseDB.store_user_metadata(
+                    user_id=user.get("user_id"),
+                    email=user.get("email")
+                )
+            except Exception as e:
+                logger.warning(f"Failed to upsert user metadata: {e}")
 
         # Save uploaded image temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
@@ -356,14 +359,15 @@ async def weed_detection(
         detection_count = len(result.boxes) if result.boxes else 0
         
         # Store in history (optional, non-blocking)
-        try:
-            await SupabaseDB.store_weed_detection(
-                user_id=user.get("user_id"),
-                filename=image.filename,
-                detections=detection_count
-            )
-        except Exception:
-            logger.warning("Failed to store weed detection history", exc_info=True)
+        if user.get("user_id"):
+            try:
+                await SupabaseDB.store_weed_detection(
+                    user_id=user.get("user_id"),
+                    filename=image.filename,
+                    detections=detection_count
+                )
+            except Exception as e:
+                logger.warning(f"Failed to store weed detection history: {e}")
         
         # Clean up temporary files
         os.remove(tmp_path)

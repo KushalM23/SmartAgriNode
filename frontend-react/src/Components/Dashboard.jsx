@@ -6,6 +6,7 @@ import { useTheme } from '../Context/ThemeContext';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('temperature');
+  const [activeSoilTab, setActiveSoilTab] = useState('ph');
   const { theme } = useTheme();
 
   const sharedGradient = {
@@ -415,23 +416,45 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="dashboard-card ph-card">
-          <h3>Soil pH</h3>
-          <ReactApexChart
-            options={phChartOptions}
-            series={phChartSeries}
-            type="line"
-          />
-          <div className="data-label">Current: {farmData.pH} pH</div>
-        </div>
-
-        <div className="dashboard-card npk-card">
-          <h3>NPK Values</h3>
-          <ReactApexChart
-            options={npkChartOptions}
-            series={npkChartSeries}
-            type="bar"
-          />
+        <div className="dashboard-card soil-card">
+          <h3>Soil Health</h3>
+          <div className="tabs">
+            <button
+              className={`tab ${activeSoilTab === 'ph' ? 'active' : ''}`}
+              onClick={() => setActiveSoilTab('ph')}
+            >
+              Soil pH
+            </button>
+            <button
+              className={`tab ${activeSoilTab === 'npk' ? 'active' : ''}`}
+              onClick={() => setActiveSoilTab('npk')}
+            >
+              NPK Values
+            </button>
+          </div>
+          <div className="metrics-content">
+            {activeSoilTab === 'ph' && (
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <ReactApexChart
+                  options={phChartOptions}
+                  series={phChartSeries}
+                  type="line"
+                  height="200"
+                />
+                <div className="data-label">Current: {farmData.pH} pH</div>
+              </div>
+            )}
+            {activeSoilTab === 'npk' && (
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <ReactApexChart
+                  options={npkChartOptions}
+                  series={npkChartSeries}
+                  type="bar"
+                  height="200"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

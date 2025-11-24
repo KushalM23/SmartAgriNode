@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Context/AuthContext';
 import { supabase } from '../supabaseClient';
+import { api } from '../lib/api';
 import './Account.css';
 import './History.css'; // Reuse some history styles
 import logOutIcon from '../assets/log-out.png';
@@ -56,18 +57,7 @@ export default function Account() {
             const token = session?.access_token;
             if (!token) return;
 
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-            const response = await fetch(`${API_URL}/api/history?limit=20`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch history');
-
-            const data = await response.json();
+            const data = await api.history(token, 20);
             setHistory(data);
         } catch (error) {
             console.error('Error fetching history:', error);
@@ -95,22 +85,9 @@ export default function Account() {
             if (!confirm('Are you sure you want to remove your profile picture?')) return;
 
             setUploading(true);
-            
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const token = session?.access_token;
-
-            const response = await fetch(`${API_URL}/api/delete-avatar`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to delete avatar');
-            }
+            
+            await api.deleteAvatar(token);
 
             setAvatarUrl(null);
             setShowAvatarMenu(false);
@@ -131,31 +108,10 @@ export default function Account() {
             }
 
             const file = event.target.files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const token = session?.access_token;
 
-            const response = await fetch(`${API_URL}/api/upload-avatar`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to upload avatar');
-            }
-
-            const data = await response.json();
+            const data = await api.uploadAvatar(file, token);
             setAvatarUrl(data.avatar_url);
-            
-            // Update local user metadata if needed, though the backend handles the DB update
-            // We might want to refresh the session or user object if possible, 
-            // but setting avatarUrl state is enough for immediate UI update.
             
         } catch (error) {
             console.error('Error uploading avatar:', error);
