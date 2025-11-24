@@ -61,8 +61,32 @@ export default function Dashboard() {
         distributed: true
       }
     },
+    responsive: [{
+      breakpoint: 768,
+      options: {
+        chart: {
+          height: 250
+        },
+        plotOptions: {
+          bar: {
+            columnWidth: '50%',
+            borderRadius: 4
+          }
+        },
+        xaxis: {
+          labels: {
+            rotate: -45,
+            style: {
+              fontSize: '10px'
+            },
+            trim: false,
+            hideOverlappingLabels: false
+          }
+        }
+      }
+    }],
     dataLabels: {
-      enabled: true,
+      enabled: false,
       style: {
         fontSize: '14px',
         colors: ['#fff']

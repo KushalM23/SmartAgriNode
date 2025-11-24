@@ -167,3 +167,70 @@
   margin-bottom: 1rem;
   font-size: 2rem;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1rem;
+  }
+
+  .hero-section {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .hero-text {
+    font-size: 1rem;
+    width: 100%;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .info-section {
+    margin: 2rem 0;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .testimonials-section {
+    padding: 1rem;
+    margin: 2rem 0;
+  }
+
+  .testimonial-content-wrapper {
+    height: 400px; /* Increase height to accommodate stacked content if needed */
+  }
+
+  .testimonial-card {
+    width: 85vw; /* Responsive width */
+    padding: 1.5rem;
+  }
+
+  .testimonial-card p {
+    font-size: 1rem;
+  }
+
+  .cta-section {
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.5rem;
+  }
+}

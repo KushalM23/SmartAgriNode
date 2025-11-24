@@ -214,27 +214,48 @@
 
 @media (max-width: 768px) {
   .card-nav-container {
-    width: 90%;
-    top: 1.2em;
+    width: 95%;
+    top: 1em;
   }
 
   .card-nav-top {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.8rem;
     justify-content: space-between;
+    gap: 10px;
   }
 
   .hamburger-menu {
-    order: 2;
+    order: 3;
   }
 
   .logo-container {
     position: static;
     transform: none;
     order: 1;
+    flex: 1; /* Allow logo to take available space or push others */
+    justify-content: flex-start;
+  }
+  
+  .logo-container h1 {
+    font-size: 1.2rem; /* Smaller logo text */
+  }
+
+  .nav-right-slot {
+    order: 2;
+    gap: 8px !important; /* Reduce gap between theme toggle and auth */
   }
 
   .card-nav-cta-button {
-    display: none;
+    display: flex; /* Show the button */
+    padding: 0.4rem 0.6rem;
+    min-width: auto;
+    font-size: 12px;
+    height: 32px;
+  }
+
+  .user-button {
+    padding: 0.2rem;
+    min-width: 32px;
   }
 
   .card-nav-content {
@@ -244,20 +265,22 @@
     padding: 0.5rem;
     bottom: 0;
     justify-content: flex-start;
+    overflow-y: auto; /* Allow scrolling if menu is long */
   }
 
   .nav-card {
     height: auto;
-    min-height: 60px;
+    min-height: 50px;
     flex: 1 1 auto;
     max-height: none;
+    margin: 5px;
   }
 
   .nav-card-label {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .nav-card-link {
-    font-size: 15px;
+    font-size: 14px;
   }
 }

@@ -129,6 +129,48 @@
 
 
 @media (max-width: 768px) {
-  .upload-section { padding: 1.25rem; }
-  .upload-row { flex-direction: column; }
+  .detection-content {
+    padding: 0 0.5rem;
+  }
+
+  .upload-section { 
+    padding: 1.5rem; 
+    width: 100%;
+  }
+
+  .upload-section h3 {
+    font-size: 1.25rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .upload-row { 
+    flex-direction: column; 
+    gap: 1.5rem;
+  }
+
+  .upload-box {
+    padding: 2rem 1rem;
+    width: 100%;
+  }
+
+  .preview-card {
+    width: 100%;
+  }
+
+  .weed-count {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+  
+  .result-card {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .browse-button {
+    width: 100%;
+    padding: 0.875rem;
+  }
 }

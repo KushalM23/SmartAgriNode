@@ -49,7 +49,7 @@ export default function NavBar() {
       menuColor="#E01709"
       ease="power3.out"
       rightSlot={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="nav-right-slot" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button 
             onClick={toggleTheme} 
             className="theme-toggle"

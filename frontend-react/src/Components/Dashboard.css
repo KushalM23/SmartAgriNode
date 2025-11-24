@@ -182,36 +182,70 @@
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 1rem;
+    padding: 0.5rem;
+  }
+
+  .dashboard-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+    margin-top: 1rem;
   }
 
   .npk-card {
     grid-column: span 1;
+    padding-bottom: 0.5rem; /* Reduce bottom padding to fit chart better */
+  }
+
+  .npk-card .apexcharts-canvas {
+    margin: 0 auto;
+    width: 100% !important; /* Ensure chart takes full width */
   }
 
   .dashboard-card {
-    min-height: 250px;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-container {
-    padding: 1rem;
+    min-height: auto;
+    padding: 1.25rem;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  .dashboard-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tabs {
+    width: 100%;
+    display: flex;
+    padding: 3px;
+  }
+
+  .tab {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .metrics-content {
+    margin-top: 0.5rem;
+    width: 100%;
+    overflow: hidden; /* Prevent chart overflow */
+  }
+
+  .circular-progress .apexcharts-canvas {
+    margin-bottom: 0.5rem;
   }
 
   .data-value {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .npk-item .data-value {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 }
