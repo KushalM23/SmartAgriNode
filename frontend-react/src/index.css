@@ -12,7 +12,7 @@
   --input-border: #ddd;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --heading-color: #1a1a1a;
-  
+
   /* Navbar & UI Specific */
   --nav-bg: #ffffff;
   --nav-text: #4a5568;
@@ -30,7 +30,7 @@
   --input-bg: #222222;
   --input-border: #232323;
   --shadow-color: rgba(0, 0, 0, 0.5);
-  --heading-color: #ffffff; 
+  --heading-color: #ffffff;
   --secondary-color: #595959;
 
   /* Navbar & UI Specific */
@@ -42,18 +42,18 @@
   --button-text: #E01709;
 }
 
-body{
-    margin: 0;
-    padding: 0;
-    font-family: Alan Sans;
-    background-color: var(--bg-color); 
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Alan Sans;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-a{
-    text-decoration: none;
-    color: inherit;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 input[type=number] {

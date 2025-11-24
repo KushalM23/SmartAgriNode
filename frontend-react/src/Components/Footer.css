@@ -1,6 +1,6 @@
 .footer {
   background-color: var(--card-bg);
-  padding: 4rem 2rem 0 2rem;
+  padding: 4rem 0 0 0;
   margin-top: auto;
   border-top: 1px solid var(--input-border);
   overflow: hidden;
@@ -34,7 +34,7 @@
   letter-spacing: 0.05em;
 }
 
-.footer-column a {
+.footer-column a, .footer-column span {
   color: var(--text-color);
   text-decoration: none;
   font-size: 0.75rem;
@@ -44,23 +44,24 @@
   display: inline-block;
   letter-spacing: 0.05em;
   transition: opacity 0.2s;
+  cursor: pointer;
 }
 
-.footer-column a:hover {
+.footer-column a:hover, .footer-column span:hover {
   color: var(--primary-color);
 }
 
 .footer-brand p {
   color: var(--secondary-color);
   font-size: 0.75rem;
-  margin: 0;
+  margin:0 2rem 1rem 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1.5;
 }
 
 .footer-brand {
-  margin-top: 2rem;
+  margin: 0;
   text-align: left;
   line-height: 0.75;
   width: 100%;

@@ -15,6 +15,7 @@ export default function CropRecommendation() {
     rainfall: ''
   });
   const [result, setResult] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,6 +48,7 @@ export default function CropRecommendation() {
       };
       const res = await api.cropRecommendation(payload, token);
       setResult(res);
+      setShowModal(true);
     } catch (err) {
       console.error("Crop recommendation error:", err);
       setError(err.message || 'Prediction failed');
@@ -184,17 +186,23 @@ export default function CropRecommendation() {
           </form>
         </div>
 
-        {result && (
-          <div className="result-card">
-            <div className="result-header">
-              <h3 className="result-title">Recommendation</h3>
-            </div>
-            <div className="result-highlight">
-              {result.recommended_crop}
-            </div>
-            <div className="result-row">
-              <span className="label">Confidence</span>
-              <span className="value">{(result.confidence * 100).toFixed(1)}%</span>
+        {showModal && result && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>Recommendation</h2>
+                <button className="close-button" onClick={() => setShowModal(false)}>&times;</button>
+              </div>
+
+              <div className="modal-body simple-result">
+                <p className="result-label">We recommend growing</p>
+                <h2 className="result-crop">{result.recommended_crop}</h2>
+                <p className="result-confidence">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
+              </div>
+
+              <div className="modal-footer">
+                <button className="done-button" onClick={() => setShowModal(false)}>Done</button>
+              </div>
             </div>
           </div>
         )}

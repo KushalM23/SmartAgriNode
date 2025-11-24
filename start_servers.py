@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-SmartAgriNode Server Startup Script
-This script starts both the backend API server and the frontend web server.
-"""
-
 import logging
 import os
 import shutil

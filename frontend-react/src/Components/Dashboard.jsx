@@ -178,13 +178,13 @@ export default function Dashboard() {
           name: {
             show: false,
             fontSize: '14px',
-            color: 'var(--primary-color)',
+            color: 'var(--text-color)',
             offsetY: 20
           },
           value: {
             show: true,
             fontSize: '24px',
-            color: 'var(--primary-color)',
+            color: 'var(--text-color)',
             offsetY: 0,
             formatter: function () {
               return farmData.temperature.toFixed(1) + '°C';
@@ -214,12 +214,12 @@ export default function Dashboard() {
       },
       foreColor: 'var(--text-color)'
     },
-    colors: ['var(--primary-color)'],
+    colors: ['var(--text-color)'],
     stroke: {
       show: true,
       curve: 'straight',
       width: 2,
-      colors: ['var(--primary-color)']
+      colors: ['var(--text-color)']
     },
     markers: {
       size: 5,
@@ -345,7 +345,7 @@ export default function Dashboard() {
                           ...tempGaugeOptions.plotOptions.radialBar.dataLabels,
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
-                            color: '#E01709',
+                            color: 'var(--text-color)',
                             formatter: function () {
                               return farmData.humidity + '%';
                             }
@@ -374,7 +374,7 @@ export default function Dashboard() {
                           ...tempGaugeOptions.plotOptions.radialBar.dataLabels,
                           value: {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
-                            color: '#E01709',
+                            color: 'var(--text-color)',
                             formatter: function () {
                               return farmData.rainfall + ' mm';
                             }

@@ -68,10 +68,6 @@ thead{
   border-bottom: none;
 }
 
-.history-table tr:hover {
-  background-color: var(--secondary-color);
-}
-
 .empty-state {
   text-align: center;
   padding: 30px;

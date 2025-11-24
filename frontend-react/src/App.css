@@ -18,7 +18,7 @@
   z-index: 1;
 }
 
-.content-wrapper {
+.app > .content-wrapper {
   flex: 1;
   margin-top: 20px;
   padding: 4rem;
@@ -26,6 +26,11 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  z-index: 2; /* Ensure in-app modals sit above footer */
+}
+
+.app > .footer {
+  z-index: 1;
 }
 
 /* Base styles for all pages */

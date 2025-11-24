@@ -1,16 +1,18 @@
 import React from 'react';
 import './Footer.css';
 import sanLogo from '../assets/SAN.png';
+import { useNavigate } from 'react-router-dom';
 
 export default function Footer() {
+  const navigate = useNavigate();
   return (
     <footer className="footer">
       <div className="footer-top">
         <div className="footer-column links">
-          <a href="/">HOME &rarr;</a>
-          <a href="/dashboard">DASHBOARD &rarr;</a>
-          <a href="/croprecommendation">CROP RECOMMENDTION &rarr;</a>
-          <a href="/weeddetection">WEED DETECTION &rarr;</a>
+          <span onClick={() => navigate('/')}>HOME &rarr;</span>
+          <span onClick={() => navigate('/dashboard')}>DASHBOARD &rarr;</span>
+          <span onClick={() => navigate('/crop-recommendation')}>CROP RECOMMENDATION &rarr;</span>
+          <span onClick={() => navigate('/weed-detection')}>WEED DETECTION &rarr;</span>
         </div>
 
         <div className="footer-column copyright">

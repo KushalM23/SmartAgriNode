@@ -35,14 +35,14 @@
 }
 
 .data-label {
-  color: var(--primary-color);
+  color: var(--text-color);
   font-size: 0.95rem;
   margin-top: auto;
   font-weight: 500;
 }
 
 .rainfall-label {
-  color: var(--primary-color);
+  color: var(--text-color);
   font-size: 0.95rem;
   margin-top: 0.5rem;
   font-weight: 500;
@@ -146,7 +146,7 @@
 .circular-progress .apexcharts-datalabel-value {
   font-size: 1.25rem !important;
   font-weight: 600 !important;
-  fill: var(--primary-color) !important;
+  fill: var(--text-color) !important;
 }
 
 .dashboard-container h1 {
