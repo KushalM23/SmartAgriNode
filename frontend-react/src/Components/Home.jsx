@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Home.css';
 
@@ -6,34 +6,31 @@ export default function Home() {
   const testimonials = [
     {
       text: "SmartAgriNode has revolutionized how I manage my farm. The crop recommendations are spot on!",
-      author: "John Doe, Wheat Farmer"
+      author: "Periyaswamy, Wheat Farmer"
     },
     {
       text: "The weed detection feature saved me hours of manual labor. Highly recommended!",
-      author: "Sarah Smith, Organic Farmer"
+      author: "Annamma shetty, Organic Farmer"
     },
     {
       text: "I love the data-driven insights. It helps me plan my season with confidence.",
-      author: "Mike Johnson, Corn Grower"
+      author: "Narayana Murthy, Corn Grower"
     },
     {
       text: "Sustainable farming is easier with SmartAgriNode. My yield has increased by 20%.",
-      author: "Emily Davis, Vineyard Owner"
+      author: "Sarala Murthy, Vineyard Owner"
     }
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
 
-  const nextTestimonial = () => {
-    setDirection(1);
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    }, 3000);
 
-  const prevTestimonial = () => {
-    setDirection(-1);
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
-  };
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
 
   const getCardStyle = (index) => {
     if (index === currentIndex) return "center";
@@ -124,7 +121,6 @@ export default function Home() {
       <div className="testimonials-section">
         <h2>What Farmers Say</h2>
         <div className="testimonial-carousel">
-          <button className="testimonial-arrow left" onClick={prevTestimonial}>&larr;</button>
           <div className="testimonial-content-wrapper">
             {testimonials.map((testimonial, index) => (
               <motion.div
@@ -139,7 +135,6 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
-          <button className="testimonial-arrow right" onClick={nextTestimonial}>&rarr;</button>
         </div>
       </div>
     </div>
