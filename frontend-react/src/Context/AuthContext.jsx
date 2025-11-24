@@ -50,10 +50,31 @@ export function AuthProvider({ children }) {
         return await supabase.auth.signOut();
     };
 
+    const refreshUser = async () => {
+        try {
+            const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+            const { data: { user: updatedUser }, error: userError } = await supabase.auth.getUser();
+
+            if (updatedUser) {
+                setUser(updatedUser);
+            }
+            
+            if (session) {
+                setSession(session);
+            }
+            
+            return { user: updatedUser, session, error: sessionError || userError };
+        } catch (error) {
+            console.error("Error refreshing user:", error);
+            return { error };
+        }
+    };
+
     const value = {
         signUp,
         signIn,
         signOut,
+        refreshUser,
         user,
         session,
         loading

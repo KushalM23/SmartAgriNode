@@ -7,6 +7,7 @@ import base64
 import logging
 import os
 import tempfile
+from contextlib import asynccontextmanager
 from typing import Optional
 
 import cv2
@@ -28,36 +29,7 @@ if not logging.getLogger().handlers:
 # Load environment variables
 load_dotenv()
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="SmartAgriNode API",
-    description="AI-powered agriculture dashboard with crop recommendation and weed detection",
-    version="2.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json"
-)
-
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://smart-agri-node.vercel.app"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Model paths and lazy loaders (improves startup time)
+# Model paths and loaders
 model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Models')
 upload_dir = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(upload_dir, exist_ok=True)
@@ -88,6 +60,46 @@ def get_weed_model():
             logger.exception("Error loading weed detection model")
             weed_model = None
     return weed_model
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load models on startup
+    logger.info("Loading models...")
+    get_crop_model()
+    get_weed_model()
+    yield
+    # Clean up resources if needed
+    logger.info("Shutting down...")
+
+# Initialize FastAPI app
+app = FastAPI(
+    lifespan=lifespan,
+    title="SmartAgriNode API",
+    description="AI-powered agriculture dashboard with crop recommendation and weed detection",
+    version="2.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
+)
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://smart-agri-node.vercel.app"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Pydantic models for request validation
 class CropRecommendationInput(BaseModel):

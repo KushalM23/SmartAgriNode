@@ -10,7 +10,7 @@ import moonIcon from '../assets/moon.png';
 import sunIcon from '../assets/sun.png';
 
 export default function Account() {
-    const { user, session, signOut } = useAuth();
+    const { user, session, signOut, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [history, setHistory] = useState({ crop_recommendations: [], weed_detections: [] });
     const [loading, setLoading] = useState(true);
@@ -89,6 +89,7 @@ export default function Account() {
             
             await api.deleteAvatar(token);
 
+            await refreshUser();
             setAvatarUrl(null);
             setShowAvatarMenu(false);
         } catch (error) {
@@ -111,6 +112,7 @@ export default function Account() {
             const token = session?.access_token;
 
             const data = await api.uploadAvatar(file, token);
+            await refreshUser();
             setAvatarUrl(data.avatar_url);
             
         } catch (error) {

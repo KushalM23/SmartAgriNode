@@ -82,9 +82,9 @@ export default function NavBar() {
                 title="Go to Account"
                 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                {user.user_metadata?.avatar_url ? (
+                {user.user_metadata?.avatar_url || user.avatar_url ? (
                   <img
-                    src={user.user_metadata.avatar_url}
+                    src={user.user_metadata?.avatar_url || user.avatar_url}
                     alt="Avatar"
                     style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #E01709' }}
                   />
