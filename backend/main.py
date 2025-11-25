@@ -29,6 +29,40 @@ if not logging.getLogger().handlers:
 # Load environment variables
 load_dotenv()
 
+DEFAULT_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://smart-agri-node.vercel.app"
+]
+
+def build_allowed_origins() -> list[str]:
+    """Return list of allowed origins from defaults + env overrides."""
+    env_value = os.getenv("FRONTEND_URLS") or os.getenv("FRONTEND_URL")
+    extra_origins = []
+    if env_value:
+        extra_origins = [origin.strip() for origin in env_value.split(',') if origin.strip()]
+
+    vercel_url = os.getenv("VERCEL_URL")
+    if vercel_url:
+        # Vercel passes host only (e.g., my-app.vercel.app)
+        vercel_origin = vercel_url if vercel_url.startswith("http") else f"https://{vercel_url}"
+        extra_origins.append(vercel_origin)
+
+    # Preserve order but remove duplicates
+    seen = set()
+    origins = []
+    for origin in [*DEFAULT_ALLOWED_ORIGINS, *extra_origins]:
+        if origin and origin not in seen:
+            seen.add(origin)
+            origins.append(origin)
+    return origins
+
 # Model paths and loaders
 model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Models')
 upload_dir = os.path.join(os.path.dirname(__file__), 'uploads')
@@ -85,17 +119,7 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://smart-agri-node.vercel.app"
-    ],
+    allow_origins=build_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

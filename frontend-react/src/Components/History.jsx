@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Context/AuthContext';
+import { api } from '../lib/api';
 import './History.css';
 
 export default function History() {
@@ -16,22 +17,7 @@ export default function History() {
             try {
                 setLoading(true);
                 const token = session.access_token;
-
-                // Use environment variable for API URL if available, otherwise default to localhost
-                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-                const response = await fetch(`${API_URL}/api/history?limit=5`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
-                const data = await response.json();
+                const data = await api.history(token, 5);
                 setHistory(data);
             } catch (err) {
                 console.error("Failed to fetch history:", err);
