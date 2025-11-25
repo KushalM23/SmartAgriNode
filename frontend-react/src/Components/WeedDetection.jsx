@@ -41,6 +41,23 @@ export default function WeedDetection() {
     }
   };
 
+  const downloadImage = async (imageUrl, filename) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || 'weed-detection-result.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  };
+
   return (
     <div className="page-container">
       <h1>Weed Detection</h1>
@@ -68,8 +85,21 @@ export default function WeedDetection() {
                 {result && result.result_image && (
                   <div className="result-container">
                     <img src={`data:image/jpeg;base64,${result.result_image}`} alt="Weed result" className="preview-img" />
-                    <div className="weed-count">
-                      <strong>{result.detections || 0} weeds detected</strong>
+                    <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'row' }}>
+                      <div className="weed-count" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0 }}>
+                        <strong>{result.detections || 0} weeds detected</strong>
+                      </div>
+                      <button 
+                        onClick={() => downloadImage(`data:image/jpeg;base64,${result.result_image}`, 'weed-detection.jpg')}
+                        className="browse-button"
+                        title="Download Result"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -81,7 +111,6 @@ export default function WeedDetection() {
           </div>
           {error && <div className="auth-error" style={{ marginTop: '12px' }}>{error}</div>}
         </div>
-        {/* Guidelines removed per request */}
       </div>
     </div>
   );

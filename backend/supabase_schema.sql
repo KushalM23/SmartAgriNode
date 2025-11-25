@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS weed_detections (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID NOT NULL,
     image_filename TEXT NOT NULL,
+    input_image_url TEXT,
+    output_image_url TEXT,
     weed_count INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
@@ -148,3 +150,11 @@ CREATE TRIGGER update_users_updated_at
 -- insert into storage.buckets (id, name) values ('avatars', 'avatars');
 -- create policy "Avatar images are publicly accessible." on storage.objects for select using ( bucket_id = 'avatars' );
 -- create policy "Anyone can upload an avatar." on storage.objects for insert with check ( bucket_id = 'avatars' );
+
+-- Make sure to create buckets named 'input-images' and 'output-images' in Supabase Storage
+-- insert into storage.buckets (id, name) values ('input-images', 'input-images');
+-- insert into storage.buckets (id, name) values ('output-images', 'output-images');
+-- create policy "Input images are publicly accessible." on storage.objects for select using ( bucket_id = 'input-images' );
+-- create policy "Anyone can upload input images." on storage.objects for insert with check ( bucket_id = 'input-images' );
+-- create policy "Output images are publicly accessible." on storage.objects for select using ( bucket_id = 'output-images' );
+-- create policy "Anyone can upload output images." on storage.objects for insert with check ( bucket_id = 'output-images' );

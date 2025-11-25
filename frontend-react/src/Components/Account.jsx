@@ -1,23 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Context/AuthContext';
+import { useTheme } from '../Context/ThemeContext';
 import { supabase } from '../supabaseClient';
 import { api } from '../lib/api';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 import './Account.css';
 import './History.css'; // Reuse some history styles
+import './WeedDetection.css';
 import logOutIcon from '../assets/log-out.png';
 import moonIcon from '../assets/moon.png';
 import sunIcon from '../assets/sun.png';
 
 export default function Account() {
     const { user, session, signOut, refreshUser } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const [history, setHistory] = useState({ crop_recommendations: [], weed_detections: [] });
     const [loading, setLoading] = useState(true);
     const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+    const [selectedWeedDetection, setSelectedWeedDetection] = useState(null);
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+    const [showRemoveAlert, setShowRemoveAlert] = useState(false);
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -82,8 +98,6 @@ export default function Account() {
 
     const handleRemoveAvatar = async () => {
         try {
-            if (!confirm('Are you sure you want to remove your profile picture?')) return;
-
             setUploading(true);
             const token = session?.access_token;
             
@@ -92,11 +106,29 @@ export default function Account() {
             await refreshUser();
             setAvatarUrl(null);
             setShowAvatarMenu(false);
+            setShowRemoveAlert(false);
         } catch (error) {
             console.error('Error removing avatar:', error);
             alert('Error removing avatar.');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const downloadImage = async (imageUrl, filename) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename || 'image.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading image:', error);
         }
     };
 
@@ -171,7 +203,19 @@ export default function Account() {
                 </div>
 
                 <div className="profile-actions">
-                    <button className="icon-button" onClick={handleLogout}>
+                    <button 
+                        onClick={toggleTheme} 
+                        className="icon-button theme-toggle-account"
+                        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                        style={{ marginRight: '10px' }}
+                    >
+                        {theme === 'light' ? (
+                            <img src={moonIcon} alt="Dark Mode" style={{ width: '24px', height: '24px' }} />
+                        ) : (
+                            <img src={sunIcon} alt="Light Mode" style={{ width: '24px', height: '24px' }} />
+                        )}
+                    </button>
+                    <button className="icon-button" onClick={handleLogout} title="Sign Out">
                         <img src={logOutIcon} alt="Logout" />
                     </button>
                 </div>
@@ -231,7 +275,11 @@ export default function Account() {
                                 </thead>
                                 <tbody>
                                     {history.weed_detections.map((item, index) => (
-                                        <tr key={index}>
+                                        <tr 
+                                            key={index}
+                                            onClick={() => setSelectedWeedDetection(item)}
+                                            className="clickable-row"
+                                        >
                                             <td>{formatDate(item.created_at)}</td>
                                             <td title={item.image_filename}>
                                                 {item.image_filename?.length > 15
@@ -284,6 +332,64 @@ export default function Account() {
                 </div>
             )}
 
+            {/* Modal for Weed Detection Details */}
+            {selectedWeedDetection && (
+                <div className="modal-overlay" onClick={() => setSelectedWeedDetection(null)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="modal-close" onClick={() => setSelectedWeedDetection(null)}>&times;</button>
+                        <h2>Weed Detection Details</h2>
+                        <div className="modal-body">
+                            <div className="modal-images" style={{ flexDirection: 'column', gap: '20px' }}>
+                                <div className="image-container" style={{ width: '100%' }}>
+                                    <h4>Input Image</h4>
+                                    {selectedWeedDetection.input_image_url ? (
+                                        <img 
+                                            src={selectedWeedDetection.input_image_url} 
+                                            alt="Input" 
+                                            className="history-image" 
+                                            style={{ width: '80%', maxHeight: '300px', objectFit: 'contain' }}
+                                        />
+                                    ) : (
+                                        <div className="empty-state">No input image available</div>
+                                    )}
+                                </div>
+                                <div className="image-container" style={{ width: '100%' }}>
+                                    <h4>Output Image</h4>
+                                    {selectedWeedDetection.output_image_url ? (
+                                        <div className="result-container" style={{ width: '100%' }}>
+                                            <img 
+                                                src={selectedWeedDetection.output_image_url} 
+                                                alt="Output" 
+                                                className="history-image preview-img" 
+                                                style={{ width: '80%', maxHeight: '300px', objectFit: 'contain' }}
+                                            />
+                                            <div style={{ display: 'flex', gap: '10px', width: '80%', flexDirection: 'row' }}>
+                                                <div className="weed-count" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0 }}>
+                                                    <strong>{selectedWeedDetection.weed_count || 0} weeds detected</strong>
+                                                </div>
+                                                <button 
+                                                    onClick={() => downloadImage(selectedWeedDetection.output_image_url, selectedWeedDetection.image_filename || 'weed-detection.jpg')}
+                                                    className="browse-button"
+                                                    title="Download Result"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="empty-state">No output image available</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Avatar Menu Modal */}
             {showAvatarMenu && (
                 <div className="modal-overlay" onClick={() => setShowAvatarMenu(false)}>
@@ -294,9 +400,27 @@ export default function Account() {
                                 {avatarUrl ? 'Change Image' : 'Upload Image'}
                             </button>
                             {avatarUrl && (
-                                <button onClick={handleRemoveAvatar} className="danger-button">
-                                    Remove Picture
-                                </button>
+                                <AlertDialog open={showRemoveAlert} onOpenChange={setShowRemoveAlert}>
+                                    <AlertDialogTrigger asChild>
+                                        <button className="danger-button">
+                                            Remove Picture
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Remove Profile Picture</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to remove your profile picture? This action cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleRemoveAvatar} className="bg-red-600 hover:bg-red-700">
+                                                Remove
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             )}
                             <button onClick={() => setShowAvatarMenu(false)} className="cancel-button">
                                 Cancel

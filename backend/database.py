@@ -155,7 +155,9 @@ class SupabaseDB:
     async def store_weed_detection(
         user_id: str,
         filename: str,
-        detections: int
+        detections: int,
+        input_image_url: Optional[str] = None,
+        output_image_url: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Store weed detection history
@@ -164,6 +166,8 @@ class SupabaseDB:
             user_id: User ID
             filename: Uploaded image filename
             detections: Number of weeds detected
+            input_image_url: URL of the input image
+            output_image_url: URL of the output image
             
         Returns:
             Stored record
@@ -176,7 +180,9 @@ class SupabaseDB:
             data = {
                 "user_id": user_id,
                 "image_filename": filename,
-                "weed_count": int(detections)
+                "weed_count": int(detections),
+                "input_image_url": input_image_url,
+                "output_image_url": output_image_url
             }
             
             result = supabase.table("weed_detections").insert(data).execute()
@@ -224,6 +230,47 @@ class SupabaseDB:
             logger.exception("Error fetching user history")
             return {"crop_recommendations": [], "weed_detections": []}
     
+    @staticmethod
+    async def upload_weed_image(user_id: str, file_content: bytes, file_ext: str, bucket_name: str) -> str:
+        """
+        Upload weed detection image to storage and return public URL
+        
+        Args:
+            user_id: User ID
+            file_content: Raw file content
+            file_ext: File extension (jpg, png, etc.)
+            bucket_name: Name of the bucket (input-images or output-images)
+            
+        Returns:
+            Public URL of the uploaded image
+        """
+        if not supabase:
+            raise RuntimeError("Supabase not configured")
+            
+        import uuid
+        filename = f"{user_id}/{uuid.uuid4()}.{file_ext}"
+        
+        try:
+            # Ensure bucket exists (optional)
+            try:
+                supabase.storage.create_bucket(bucket_name, options={"public": True})
+            except Exception:
+                pass
+
+            # Upload file
+            supabase.storage.from_(bucket_name).upload(
+                path=filename,
+                file=file_content,
+                file_options={"content-type": f"image/{file_ext}", "upsert": "true"}
+            )
+            
+            # Get public URL
+            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            return public_url
+        except Exception as e:
+            logger.exception(f"Error uploading image to {bucket_name}")
+            raise e
+
     @staticmethod
     async def upload_avatar(user_id: str, file_content: bytes, file_ext: str) -> str:
         """

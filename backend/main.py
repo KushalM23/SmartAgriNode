@@ -135,6 +135,8 @@ class WeedDetectionResponse(BaseModel):
     result_image: str = Field(..., description="Base64 encoded annotated image")
     detections: int = Field(..., description="Number of weeds detected")
     message: str
+    input_image_url: Optional[str] = None
+    output_image_url: Optional[str] = None
 
 class HealthResponse(BaseModel):
     """Response model for health check"""
@@ -345,6 +347,19 @@ async def weed_detection(
             except Exception as e:
                 logger.warning(f"Failed to upsert user metadata: {e}")
 
+        # Upload input image to Supabase Storage
+        input_image_url = None
+        if user.get("user_id"):
+            try:
+                input_image_url = await SupabaseDB.upload_weed_image(
+                    user_id=user.get("user_id"),
+                    file_content=contents,
+                    file_ext=file_ext.lstrip('.'),
+                    bucket_name="input-images"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to upload input image: {e}")
+
         # Save uploaded image temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
             tmp_file.write(contents)
@@ -365,8 +380,22 @@ async def weed_detection(
         
         # Convert to base64
         with open(output_path, "rb") as img_file:
-            img_data = base64.b64encode(img_file.read()).decode('utf-8')
+            output_content = img_file.read()
+            img_data = base64.b64encode(output_content).decode('utf-8')
         
+        # Upload output image to Supabase Storage
+        output_image_url = None
+        if user.get("user_id"):
+            try:
+                output_image_url = await SupabaseDB.upload_weed_image(
+                    user_id=user.get("user_id"),
+                    file_content=output_content,
+                    file_ext="jpg",
+                    bucket_name="output-images"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to upload output image: {e}")
+
         # Get detection count
         detection_count = len(result.boxes) if result.boxes else 0
         
@@ -376,7 +405,9 @@ async def weed_detection(
                 await SupabaseDB.store_weed_detection(
                     user_id=user.get("user_id"),
                     filename=image.filename,
-                    detections=detection_count
+                    detections=detection_count,
+                    input_image_url=input_image_url,
+                    output_image_url=output_image_url
                 )
             except Exception as e:
                 logger.warning(f"Failed to store weed detection history: {e}")
@@ -388,7 +419,9 @@ async def weed_detection(
         return WeedDetectionResponse(
             result_image=img_data,
             detections=detection_count,
-            message="Weed detection completed successfully"
+            message="Weed detection completed successfully",
+            input_image_url=input_image_url,
+            output_image_url=output_image_url
         )
     
     except Exception as e:

@@ -1,13 +1,103 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
 import History from './History';
 import { useTheme } from '../Context/ThemeContext';
+import { fetchWeatherApi } from 'openmeteo';
+
+const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
+const WEATHER_PARAMS = {
+  hourly: ['temperature_2m', 'relative_humidity_2m'],
+  current: ['precipitation', 'temperature_2m', 'relative_humidity_2m'],
+  timezone: 'auto'
+};
+
+const DEFAULT_COORDS = {
+  latitude: 12.9719,
+  longitude: 77.5937
+};
+
+const INITIAL_WEATHER = {
+  temperature: 23.09,
+  humidity: 84.86,
+  rainfall: 71.29
+};
+
+const SOIL_DATA = {
+  pH: 6.92,
+  nitrogen: 136,
+  phosphorus: 36,
+  potassium: 20
+};
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('temperature');
   const [activeSoilTab, setActiveSoilTab] = useState('ph');
   const { theme } = useTheme();
+  const [weatherData, setWeatherData] = useState(INITIAL_WEATHER);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const parseCoordinate = (value, fallback) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const loadWeather = async () => {
+      try {
+        const latitude = parseCoordinate(import.meta.env?.VITE_OPEN_METEO_LAT, DEFAULT_COORDS.latitude);
+        const longitude = parseCoordinate(import.meta.env?.VITE_OPEN_METEO_LON, DEFAULT_COORDS.longitude);
+
+        const responses = await fetchWeatherApi(OPEN_METEO_URL, {
+          ...WEATHER_PARAMS,
+          latitude,
+          longitude
+        });
+
+        const response = responses[0];
+        if (!response) {
+          return;
+        }
+
+        const current = response.current();
+        if (!current || typeof current.variables !== 'function') {
+          return;
+        }
+
+        const getVariableValue = (index) => {
+          try {
+            const variable = current.variables(index);
+            return typeof variable?.value === 'function' ? variable.value() : undefined;
+          } catch (error) {
+            console.error('Failed to read Open-Meteo variable', error);
+            return undefined;
+          }
+        };
+
+        const precipitation = getVariableValue(0);
+        const temperature = getVariableValue(1);
+        const humidity = getVariableValue(2);
+
+        if (isMounted) {
+          setWeatherData((prev) => ({
+            temperature: typeof temperature === 'number' ? Number(temperature.toFixed(2)) : prev.temperature,
+            humidity: typeof humidity === 'number' ? Number(humidity.toFixed(2)) : prev.humidity,
+            rainfall: typeof precipitation === 'number' ? Number(precipitation.toFixed(2)) : prev.rainfall
+          }));
+        }
+      } catch (error) {
+        console.error('Unable to load Open-Meteo weather data', error);
+      }
+    };
+
+    // Pull live weather metrics once on mount.
+    loadWeather();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const sharedGradient = {
     type: 'gradient',
@@ -33,16 +123,6 @@ export default function Dashboard() {
         }
       ]
     }
-  };
-  // Example data - replace with actual API data later
-  const farmData = {
-    temperature: 23.09,
-    humidity: 84.86,
-    rainfall: 71.29,
-    pH: 6.92,
-    nitrogen: 136,
-    phosphorus: 36,
-    potassium: 20
   };
 
   // NPK Bar Chart Config
@@ -129,44 +209,35 @@ export default function Dashboard() {
       show: false
     },
     tooltip: {
-      theme: theme, // This sets the base theme (light/dark)
+      theme: theme,
       style: {
-        fontSize: '12px',
-        fontFamily: undefined
+        fontSize: '12px'
       },
-      // You can override specific colors here if the theme isn't enough
       onDatasetHover: {
-        highlightDataSeries: true,
+        highlightDataSeries: true
       },
       x: {
         show: true,
-        format: 'dd MMM',
-        formatter: undefined,
-      },
-      y: {
-        formatter: undefined,
-        title: {
-          formatter: (seriesName) => seriesName,
-        },
+        format: 'dd MMM'
       },
       marker: {
-        show: true,
+        show: true
       },
       items: {
-        display: 'flex',
+        display: 'flex'
       },
       fixed: {
         enabled: false,
         position: 'topRight',
         offsetX: 0,
-        offsetY: 0,
-      },
+        offsetY: 0
+      }
     }
   };
 
   const npkChartSeries = [{
     name: 'NPK Values',
-    data: [farmData.nitrogen, farmData.phosphorus, farmData.potassium]
+    data: [SOIL_DATA.nitrogen, SOIL_DATA.phosphorus, SOIL_DATA.potassium]
   }];
 
   // Temperature Gauge Config
@@ -212,7 +283,7 @@ export default function Dashboard() {
             color: 'var(--text-color)',
             offsetY: 0,
             formatter: function () {
-              return farmData.temperature.toFixed(1) + '°C';
+              return weatherData.temperature.toFixed(1) + '°C';
             }
           }
         }
@@ -225,7 +296,7 @@ export default function Dashboard() {
     labels: ['Temperature']
   };
 
-  const tempGaugeSeries = [Math.min(Math.max((farmData.temperature / 45) * 100, 0), 100)];
+  const tempGaugeSeries = [Math.min(Math.max((weatherData.temperature / 45) * 100, 0), 100)];
 
   // pH Level Chart Config
   const phChartOptions = {
@@ -311,11 +382,10 @@ export default function Dashboard() {
     }
   };
 
-  // pH data with more realistic weekly trend
   const phChartSeries = [{
     name: 'pH Level',
     type: 'line',
-    data: [6.3, 5.3, 6.7, farmData.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
+    data: [6.3, 5.3, 6.7, SOIL_DATA.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
   }];
 
   return (
@@ -372,14 +442,14 @@ export default function Dashboard() {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: 'var(--text-color)',
                             formatter: function () {
-                              return farmData.humidity + '%';
+                              return weatherData.humidity.toFixed(1) + '%';
                             }
                           }
                         }
                       }
                     }
                   }}
-                  series={[farmData.humidity]}
+                  series={[Math.min(Math.max(weatherData.humidity, 0), 100)]}
                   type="radialBar"
                 />
               </div>
@@ -401,14 +471,14 @@ export default function Dashboard() {
                             ...tempGaugeOptions.plotOptions.radialBar.dataLabels.value,
                             color: 'var(--text-color)',
                             formatter: function () {
-                              return farmData.rainfall + ' mm';
+                              return weatherData.rainfall.toFixed(1) + ' mm';
                             }
                           }
                         }
                       }
                     }
                   }}
-                  series={[Math.min(farmData.rainfall * 10, 100)]}
+                  series={[Math.min(weatherData.rainfall * 10, 100)]}
                   type="radialBar"
                 />
               </div>
@@ -441,7 +511,7 @@ export default function Dashboard() {
                   type="line"
                   height="200"
                 />
-                <div className="data-label">Current: {farmData.pH} pH</div>
+                <div className="data-label">Current: {SOIL_DATA.pH} pH</div>
               </div>
             )}
             {activeSoilTab === 'npk' && (

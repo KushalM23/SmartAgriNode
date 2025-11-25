@@ -7,6 +7,7 @@ export default function History() {
     const [history, setHistory] = useState({ crop_recommendations: [], weed_detections: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedWeedDetection, setSelectedWeedDetection] = useState(null);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -71,6 +72,15 @@ export default function History() {
         return 'confidence-low';
     };
 
+    const handleWeedDetectionClick = (item) => {
+        console.log("Weed detection clicked:", item);
+        setSelectedWeedDetection(item);
+    };
+
+    const closeWeedDetectionModal = () => {
+        setSelectedWeedDetection(null);
+    };
+
     return (
         <div className="history-container">
             <div className="history-card">
@@ -119,7 +129,17 @@ export default function History() {
                             </thead>
                             <tbody>
                                 {history.weed_detections.map((item, index) => (
-                                    <tr key={item.id || index}>
+                                    <tr 
+                                        key={item.id || index} 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleWeedDetectionClick(item);
+                                        }}
+                                        className="clickable-row"
+                                        style={{ cursor: 'pointer' }}
+                                        role="button"
+                                        tabIndex={0}
+                                    >
                                         <td>{formatDate(item.created_at)}</td>
                                         <td title={item.image_filename}>
                                             {item.image_filename ?
@@ -136,6 +156,53 @@ export default function History() {
                     )}
                 </div>
             </div>
+
+            {selectedWeedDetection && (
+                <div className="modal-overlay" onClick={closeWeedDetectionModal}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Weed Detection Details</h2>
+                            <button className="close-button" onClick={closeWeedDetectionModal}>&times;</button>
+                        </div>
+
+                        <div className="modal-body">
+                            <p className="result-label">Detected on {formatDate(selectedWeedDetection.created_at)}</p>
+                            <h2 className="result-crop">{selectedWeedDetection.weed_count} Weeds Detected</h2>
+                            
+                            <div className="modal-images">
+                                <div className="image-container">
+                                    <h4>Input Image</h4>
+                                    {selectedWeedDetection.input_image_url ? (
+                                        <img 
+                                            src={selectedWeedDetection.input_image_url} 
+                                            alt="Input" 
+                                            className="history-image" 
+                                        />
+                                    ) : (
+                                        <div className="empty-state">No input image available</div>
+                                    )}
+                                </div>
+                                <div className="image-container">
+                                    <h4>Output Image</h4>
+                                    {selectedWeedDetection.output_image_url ? (
+                                        <img 
+                                            src={selectedWeedDetection.output_image_url} 
+                                            alt="Output" 
+                                            className="history-image" 
+                                        />
+                                    ) : (
+                                        <div className="empty-state">No output image available</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button className="done-button" onClick={closeWeedDetectionModal}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
