@@ -24,6 +24,8 @@ opencv-python
 ultralytics
 torch
 Pillow
+onnx
+onnxruntime
 
 gunicorn
 uvicorn

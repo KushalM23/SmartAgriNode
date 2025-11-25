@@ -9,6 +9,7 @@ import os
 import tempfile
 from contextlib import asynccontextmanager
 from typing import Optional
+import torch
 
 import cv2
 import joblib
@@ -71,7 +72,7 @@ os.makedirs(upload_dir, exist_ok=True)
 crop_model = None
 weed_model = None
 crop_model_path = os.path.join(model_dir, 'crop_recommendation_model.pkl')
-weed_model_path = os.path.join(model_dir, 'weed_detection_model.pt')
+weed_model_path = os.path.join(model_dir, 'weed_detection_model.onnx')
 
 def get_crop_model():
     global crop_model
@@ -88,7 +89,7 @@ def get_weed_model():
     global weed_model
     if weed_model is None and os.path.exists(weed_model_path):
         try:
-            weed_model = YOLO(weed_model_path)
+            weed_model = YOLO(weed_model_path, task='detect')
             logger.info("Weed detection model loaded successfully")
         except Exception:
             logger.exception("Error loading weed detection model")
@@ -99,6 +100,14 @@ def get_weed_model():
 async def lifespan(app: FastAPI):
     # Load models on startup
     logger.info("Loading models...")
+    
+    # Optimize PyTorch for CPU execution (crucial for Render free tier)
+    try:
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+    except Exception as e:
+        logger.warning(f"Could not set torch threads: {e}")
+        
     get_crop_model()
     get_weed_model()
     yield
