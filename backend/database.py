@@ -7,6 +7,8 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
+import httpx
+
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
@@ -15,6 +17,7 @@ load_dotenv()
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 # Initialize Supabase client
 supabase: Optional[Client] = None
@@ -52,14 +55,50 @@ class SupabaseDB:
         Returns:
             User data if valid, None otherwise
         """
-        if not supabase:
+        if not token:
+            logger.warning("No token provided for verification")
             return None
-            
+
+        if not SUPABASE_URL:
+            logger.warning("SUPABASE_URL not configured; cannot verify token")
+            return None
+
+        api_key = SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY
+        if not api_key:
+            logger.warning("Supabase API key not configured; cannot verify token")
+            return None
+
+        verify_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/user"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "apikey": api_key
+        }
+
         try:
-            user = supabase.auth.get_user(token)
-            return user.user if user else None
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                response = await client.get(verify_url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                if not data.get("id"):
+                    logger.warning("Supabase verification succeeded but missing user id")
+                    return None
+                return {
+                    "id": data.get("id"),
+                    "email": data.get("email"),
+                    "user_metadata": data.get("user_metadata", {}),
+                    "app_metadata": data.get("app_metadata", {})
+                }
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 401:
+                logger.warning("Token verification failed: unauthorized (401)")
+            else:
+                logger.exception("Supabase verification HTTP error: %s", exc)
+            return None
+        except httpx.RequestError:
+            logger.exception("Supabase verification network error")
+            return None
         except Exception:
-            logger.exception("Token verification failed")
+            logger.exception("Unexpected error verifying Supabase token")
             return None
     
     @staticmethod

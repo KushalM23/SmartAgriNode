@@ -181,10 +181,11 @@ async def verify_supabase_token(authorization: Optional[str] = Header(None)) -> 
         user = await SupabaseDB.verify_jwt(token)
         
         if user:
-            logger.info("Token verified for user %s", user.id)
+            user_id = user.get("id") or user.get("user_id")
+            logger.info("Token verified for user %s", user_id)
             return {
-                "user_id": user.id,
-                "email": user.email
+                "user_id": user_id,
+                "email": user.get("email")
             }
         else:
             logger.warning("Token verification failed: verify_jwt returned None")
