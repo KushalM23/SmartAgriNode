@@ -87,6 +87,7 @@ export default function NavBar() {
                     src={user.user_metadata?.avatar_url || user.avatar_url}
                     alt="Avatar"
                     style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #E01709' }}
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#E01709', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>

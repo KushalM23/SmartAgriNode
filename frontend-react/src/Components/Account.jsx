@@ -145,7 +145,12 @@ export default function Account() {
                 <div className="user-info">
                     <div className="avatar-wrapper" onClick={handleAvatarClick}>
                         {avatarUrl ? (
-                            <img src={avatarUrl} alt="Profile" className="avatar-image" />
+                            <img 
+                                src={avatarUrl} 
+                                alt="Profile" 
+                                className="avatar-image" 
+                                crossOrigin="anonymous"
+                            />
                         ) : (
                             <div className="avatar-placeholder">
                                 {user?.email?.charAt(0).toUpperCase()}

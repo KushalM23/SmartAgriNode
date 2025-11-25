@@ -153,7 +153,7 @@ export default function Dashboard() {
         show: true,
       },
       items: {
-         display: 'flex',
+        display: 'flex',
       },
       fixed: {
         enabled: false,

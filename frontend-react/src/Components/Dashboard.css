@@ -133,7 +133,6 @@
   margin-top: 0.5rem;
 }
 
-/* Style for the gauge labels */
 .circular-progress .apexcharts-datalabel-label {
   font-size: 0.875rem !important;
   font-weight: 500 !important;
