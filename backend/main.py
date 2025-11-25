@@ -391,7 +391,12 @@ async def weed_detection(
             tmp_path = tmp_file.name
         
         # Run weed detection
-        results = model(tmp_path)
+        # Run inference in a thread to avoid blocking the event loop
+        import asyncio
+        from functools import partial
+        
+        # Run model inference
+        results = await asyncio.to_thread(model, tmp_path)
         result = results[0]
         
         # Save annotated image
@@ -401,17 +406,24 @@ async def weed_detection(
         with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as output_file:
             output_path = output_file.name
         
-        cv2.imwrite(output_path, annotated_img)
+        # Perform blocking I/O in a thread
+        await asyncio.to_thread(cv2.imwrite, output_path, annotated_img)
         
         # Convert to base64
-        with open(output_path, "rb") as img_file:
-            output_content = img_file.read()
-            img_data = base64.b64encode(output_content).decode('utf-8')
+        def read_and_encode(path):
+            with open(path, "rb") as img_file:
+                return base64.b64encode(img_file.read()).decode('utf-8')
+
+        img_data = await asyncio.to_thread(read_and_encode, output_path)
         
         # Upload output image to Supabase Storage
         output_image_url = None
         if user.get("user_id"):
             try:
+                # Need to read the file content again for upload since we read it inside the thread function
+                with open(output_path, "rb") as f:
+                    output_content = f.read()
+                    
                 output_image_url = await SupabaseDB.upload_weed_image(
                     user_id=user.get("user_id"),
                     file_content=output_content,
