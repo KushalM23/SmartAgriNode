@@ -1,27 +1,24 @@
 # Product Requirements Document (PRD)
 ## SmartAgriNode - AI-Powered Agriculture Dashboard
 
-**Document Version:** 2.0  
-**Last Updated:** November 9, 2025  
+**Document Version:** 2.1  
+**Last Updated:** December 1, 2025  
 **Project Repository:** [KushalM23/SmartAgriNode](https://github.com/KushalM23/SmartAgriNode)
+**Live Deployment:** [https://smart-agri-node.vercel.app](https://smart-agri-node.vercel.app)
 
 ---
 
 ## 1. Executive Summary
 
-### 1.0 Version 2.0 Summary
+### 1.0 Version 2.1 Summary
 
-**Major Changes in v2.0:**
-- **Backend:** Migrated from Flask to FastAPI for better performance and automatic API documentation
-- **Authentication:** Replaced Clerk with Supabase Auth for integrated user management
-- **Database:** Migrated from SQLite to Supabase (PostgreSQL) for scalable cloud storage
-- **API Documentation:** Auto-generated Swagger UI and ReDoc at `/api/docs` and `/api/redoc`
-- **User History:** Implemented backend API for storing and retrieving user activity history
-- **Account Page:** Added dedicated user profile management and detailed history view
-- **Dashboard:** Enhanced with interactive ApexCharts visualizations for climate and soil data
-- **Development:** Improved startup script with better error handling and npm path resolution
+**Major Changes in v2.1:**
+- **Live Deployment:** Frontend deployed on Vercel for public access.
+- **Weed Detection Optimization:** Integrated ONNX Runtime for faster inference and optimized threading.
+- **UI Enhancements:** Added Radix UI components (Alert Dialog) and improved Account/Dashboard UI.
+- **Backend:** Refactored FastAPI app initialization and enhanced Supabase token verification.
 
-**Current Status:** v2.0.0 - Fully functional with authentication, ML features, and database persistence
+**Current Status:** v2.1.0 - Live and fully functional with optimized ML models.
 
 ### 1.1 Product Overview
 SmartAgriNode is an AI-powered web application designed to assist farmers and agricultural professionals in making data-driven decisions. The platform leverages machine learning models to provide intelligent crop recommendations based on soil conditions and advanced weed detection capabilities through computer vision.
@@ -107,7 +104,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 | Requirement ID | Description | Acceptance Criteria |
 |----------------|-------------|---------------------|
 | WEED-001 | Image upload functionality | - Accept JPG, PNG, JPEG formats<br>- Max file size: 16MB<br>- Drag-and-drop and file picker support |
-| WEED-002 | Weed detection processing | - Process image through YOLOv8 model<br>- Detect and localize weeds<br>- Processing time < 5 seconds per image |
+| WEED-002 | Weed detection processing | - Process image through YOLOv8 model (ONNX optimized)<br>- Detect and localize weeds<br>- Processing time < 5 seconds per image |
 | WEED-003 | Display detection results | - Show annotated image with bounding boxes<br>- Display number of weeds detected<br>- Provide download option for results |
 | WEED-004 | Error handling for detection | - Handle unsupported formats gracefully<br>- Provide clear error messages<br>- Allow retry without losing context |
 
@@ -184,14 +181,14 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 │                   Client Layer                       │
 │  React.js Frontend (Vite) - Port 5173              │
 │  - React Router for navigation                      │
-│  - Clerk React SDK for authentication               │
+│  - Supabase Auth Client                             │
 │  - Fetch API for HTTP requests                      │
 └─────────────────────────────────────────────────────┘
                          ↓ HTTPS/REST API + JWT
 ┌─────────────────────────────────────────────────────┐
 │              Application Layer                       │
 │  FastAPI Backend - Port 5000                        │
-│  - Clerk JWT verification middleware                │
+│  - Supabase JWT verification middleware             │
 │  - CORS middleware                                  │
 │  - RESTful API with OpenAPI docs                    │
 │  - Pydantic data validation                         │
@@ -199,7 +196,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
                          ↓
 ┌─────────────────────────────────────────────────────┐
 │              Authentication Layer                    │
-│  Clerk Authentication Service                        │
+│  Supabase Authentication Service                     │
 │  - JWT token generation/verification                │
 │  - OAuth providers (Google, GitHub, etc.)           │
 │  - User management                                  │
@@ -209,7 +206,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 │                  ML Model Layer                      │
 │  - Random Forest (Crop Recommendation)              │
 │  - YOLOv8 (Weed Detection)                          │
-│  - scikit-learn, ultralytics, PyTorch               │
+│  - scikit-learn, ultralytics, PyTorch, ONNX         │
 └─────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────┐
@@ -227,7 +224,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 - **Build Tool:** Vite (Rolldown variant)
 - **Routing:** React Router v7
 - **Authentication:** Supabase JS Client
-- **Styling:** CSS3 (custom styles)
+- **Styling:** CSS3 (custom styles), Radix UI
 - **Charts:** ApexCharts & React-ApexCharts
 - **Animations:** GSAP
 - **Icons:** React Icons
@@ -243,7 +240,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 
 #### Machine Learning
 - **Crop Model:** Random Forest (scikit-learn, joblib)
-- **Weed Detection:** YOLOv8 (ultralytics)
+- **Weed Detection:** YOLOv8 (ultralytics), ONNX Runtime
 - **Deep Learning:** PyTorch
 - **Image Processing:** OpenCV, Pillow
 - **Data Processing:** NumPy, Pandas
@@ -259,7 +256,7 @@ To empower farmers with accessible, accurate, and actionable AI-driven insights 
 - **Node.js:** 16+
 - **OS:** Cross-platform (Windows, macOS, Linux)
 - **Production Backend:** Gunicorn + Uvicorn workers
-- **Production Frontend:** Vercel (recommended)
+- **Production Frontend:** Vercel (Live at smart-agri-node.vercel.app)
 
 ### 4.3 Data Models
 
@@ -314,7 +311,7 @@ weed_detections {
 #### Weed Detection Input (API)
 ```
 Multipart form-data with image file (JPG/PNG/JPEG, max 16MB)
-Authorization: Bearer <clerk_jwt_token>
+Authorization: Bearer <supabase_jwt_token>
 ```
 
 ---
@@ -345,7 +342,7 @@ All protected endpoints require a valid Supabase JWT token. Tokens are automatic
 ```json
 {
   "name": "SmartAgriNode API",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "AI-powered agriculture dashboard",
   "docs": "/api/docs"
 }
@@ -534,7 +531,7 @@ Interactive API documentation is automatically generated by FastAPI:
 ### 6.2 Weed Detection Model
 
 **Model Type:** YOLOv8 Object Detection  
-**Model File:** `Models/weed_detection_model.pt`
+**Model File:** `Models/weed_detection_model.pt` / `Models/weed_detection_model.onnx`
 
 **Training Dataset:**
 - Source: `data/weeddataset/`
@@ -545,6 +542,7 @@ Interactive API documentation is automatically generated by FastAPI:
 
 **Architecture:**
 - Base Model: YOLOv8n (nano variant)
+- Optimization: ONNX Runtime
 - Input: RGB images (JPG, PNG, JPEG - max 16MB)
 - Output: Bounding boxes with confidence scores
 - Post-processing: Annotated image with bounding boxes
@@ -860,6 +858,7 @@ Interactive API documentation is automatically generated by FastAPI:
 |---------|------|--------|---------|
 | 1.0 | 2025-11-05 | Initial | Initial PRD creation |
 | 2.0 | 2025-11-09 | Update | Updated for v2.0 architecture (FastAPI + Clerk + Supabase)<br>- Added user history endpoint documentation<br>- Updated technology stack details<br>- Enhanced dashboard requirements with chart visualizations<br>- Added implementation details for ML models<br>- Updated deployment recommendations<br>- Added status to Phase 2 features<br>- Marked completed documentation items |
+| 2.1 | 2025-12-01 | Update | Updated for v2.1 release<br>- Added Live Deployment link<br>- Integrated ONNX Runtime for optimized weed detection<br>- Added Radix UI components<br>- Refactored backend initialization |
 
 ---
 

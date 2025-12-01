@@ -2,12 +2,16 @@
 
 A comprehensive web dashboard that leverages machine learning for crop recommendation and weed detection in agriculture.
 
+## 🚀 Live Demo
+
+**Access the live application here:** [https://smart-agri-node.vercel.app](https://smart-agri-node.vercel.app)
+
 ## Features
 
 - **User Authentication**: Secure authentication with Supabase Auth (Email/Password)
 - **Account Management**: Profile management with avatar upload and detailed history view
 - **Crop Recommendation**: AI-powered crop suggestions based on soil and environmental parameters
-- **Weed Detection**: Advanced image processing to identify weeds in agricultural images
+- **Weed Detection**: Advanced image processing to identify weeds in agricultural images (Optimized with ONNX)
 - **Dashboard**: Interactive web dashboard for viewing soil and climate insights
 - **User History**: Automatic tracking of recommendations and detections (stored in Supabase)
 
@@ -17,13 +21,13 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 - **Framework:** FastAPI (async Python web framework)
 - **Authentication:** Supabase Auth (JWT-based authentication)
 - **Database:** Supabase (PostgreSQL cloud database)
-- **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch
+- **ML Libraries:** scikit-learn, joblib, ultralytics (YOLOv8), OpenCV, torch, ONNX Runtime
 
 ### Frontend
 - **Framework:** React.js with Vite
 - **Authentication:** Supabase JS Client
 - **HTTP Client:** Fetch API
-- **Dependencies:** React Router, ApexCharts, GSAP
+- **Dependencies:** React Router, ApexCharts, GSAP, Radix UI
 
 ## Project Structure
 
@@ -31,7 +35,8 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 SmartAgriNode/
 ├── Models/                      # Trained ML model files
 │   ├── crop_recommendation_model.pkl
-│   └── weed_detection_model.pt
+│   ├── weed_detection_model.pt
+│   └── weed_detection_model.onnx
 ├── backend/                     # FastAPI backend
 │   ├── main.py                  # FastAPI application entry point
 │   ├── database.py              # Supabase database utilities
@@ -63,17 +68,9 @@ SmartAgriNode/
 └── README.md                    # This file
 ```
 
-## Quick Start
-1. Clone the repository
-2. Set up Supabase project
-3. Configure environment variables (.env files)
-4. Create & activate Python virtual environment
-5. Install backend dependencies (`pip install -r requirements.txt`)
-6. Run database schema in Supabase SQL Editor
-7. Start servers (`python start_servers.py`)
+## Local Development Setup
 
-
-## Setup Instructions
+If you want to run the project locally or contribute, follow these steps:
 
 ### 1. Clone repo:
 ```bash
@@ -136,8 +133,6 @@ The script will automatically install frontend dependencies (npm install) if mis
 
 ## Usage
 
-Once running at http://localhost:5173:
-
 ### Sign Up / Log In
 - Click "Sign In" in the navigation
 - Sign up with email and password
@@ -164,7 +159,7 @@ Once running at http://localhost:5173:
 - Go to the "Weed Detection" page (requires authentication)
 - Upload an image of a field/plant (JPG/PNG, max 16MB)
 - Click "Detect Weeds"
-- The YOLOv8 model detects and highlights weeds with bounding boxes
+- The YOLOv8 model (optimized with ONNX) detects and highlights weeds with bounding boxes
 - Results are automatically saved to your history in Supabase
 
 ### Dashboard
@@ -214,9 +209,10 @@ Interactive API documentation available at:
 
 ### Weed Detection Model
 - **Algorithm**: YOLOv8 Object Detection (nano variant)
+- **Optimization**: ONNX Runtime for faster inference
 - **Input**: RGB images (JPG, PNG, JPEG)
 - **Output**: Annotated images with bounding boxes around detected weeds
-- **Model Location**: `Models/weed_detection_model.pt`
+- **Model Location**: `Models/weed_detection_model.pt` / `Models/weed_detection_model.onnx`
 - **Training Data**: Custom weed dataset (`data/weeddataset/`) with labeled images in YOLO format
 
 
@@ -251,6 +247,7 @@ python -m uvicorn main:app --reload --port 5000
 - Ensure required files exist:
   - `Models/crop_recommendation_model.pkl`
   - `Models/weed_detection_model.pt`
+  - `Models/weed_detection_model.onnx`
 - Check file names match exactly what `backend/main.py` expects
 - Visit http://localhost:5000/api/health to verify model status
 
