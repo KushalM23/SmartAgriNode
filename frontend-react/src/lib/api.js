@@ -37,9 +37,6 @@ async function request(path, options = {}, token = null) {
 }
 
 export const api = {
-    // Health check (no auth required)
-    healthCheck: () => request('/health', { method: 'GET' }),
-
     // ML endpoints (require Supabase token)
     cropRecommendation: (payload, token) => 
         request('/crop-recommendation', { 

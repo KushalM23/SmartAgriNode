@@ -402,7 +402,6 @@ async def weed_detection(
         # Run weed detection
         # Run inference in a thread to avoid blocking the event loop
         import asyncio
-        from functools import partial
         
         # Run model inference
         results = await asyncio.to_thread(model, tmp_path)

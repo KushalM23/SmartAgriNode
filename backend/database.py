@@ -133,27 +133,6 @@ class SupabaseDB:
             return {"user_id": user_id, "email": email}
     
     @staticmethod
-    async def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get user by User ID
-        
-        Args:
-            user_id: User ID
-            
-        Returns:
-            User record or None
-        """
-        if not supabase:
-            return None
-        
-        try:
-            result = supabase.table("users").select("*").eq("user_id", user_id).execute()
-            return result.data[0] if result.data else None
-        except Exception:
-            logger.exception("Error fetching user")
-            return None
-    
-    @staticmethod
     async def store_crop_recommendation(
         user_id: str,
         input_data: Dict[str, float],

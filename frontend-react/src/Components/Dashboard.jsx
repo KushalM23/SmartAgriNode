@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
-import History from './History';
 import { useTheme } from '../Context/ThemeContext';
 import { fetchWeatherApi } from 'openmeteo';
 
