@@ -7,10 +7,16 @@ import { useWeather } from '../Context/WeatherContext';
 import { api } from '../lib/api';
 
 const SOIL_DATA = {
-  pH: 6.92,
-  nitrogen: 136,
-  phosphorus: 36,
-  potassium: 20
+  pH: 6.9,
+  nitrogen: 136.0,
+  phosphorus: 36.0,
+  potassium: 20.0
+};
+
+const getPhStatus = (ph) => {
+  if (ph < 6.0) return 'Acidic';
+  if (ph > 7.5) return 'Alkaline';
+  return 'Neutral';
 };
 
 export default function Dashboard() {
@@ -20,31 +26,37 @@ export default function Dashboard() {
   const { session } = useAuth();
   const { weatherData } = useWeather();
   const [soilData, setSoilData] = useState(SOIL_DATA);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
+    let pollInterval;
 
-    // Trigger sensor measurement on mount if logged in
     const fetchSensorData = async () => {
-      if (!session?.access_token) return;
+      if (!session?.access_token) {
+        setLoading(false);
+        return;
+      }
       
       try {
+        setLoading(true);
         // 1. Trigger measurement
         await api.triggerSensorMeasurement(session.access_token);
         
         // 2. Poll for results
-        const pollInterval = setInterval(async () => {
+        pollInterval = setInterval(async () => {
           if (!isMounted) return;
           try {
             const res = await api.getLatestSensors(session.access_token);
             if (res.status === 'complete' && res.data) {
               clearInterval(pollInterval);
               setSoilData({
-                pH: res.data.ph,
-                nitrogen: res.data.N,
-                phosphorus: res.data.P,
-                potassium: res.data.K
+                pH: parseFloat(res.data.ph.toFixed(1)),
+                nitrogen: parseFloat(res.data.N.toFixed(1)),
+                phosphorus: parseFloat(res.data.P.toFixed(1)),
+                potassium: parseFloat(res.data.K.toFixed(1))
               });
+              setLoading(false);
             }
           } catch (e) {
             console.error("Polling error", e);
@@ -52,10 +64,14 @@ export default function Dashboard() {
         }, 2000);
 
         // Stop polling after 30 seconds
-        setTimeout(() => clearInterval(pollInterval), 30000);
+        setTimeout(() => {
+            clearInterval(pollInterval);
+            if(isMounted) setLoading(false);
+        }, 30000);
         
       } catch (e) {
         console.error("Failed to trigger sensors", e);
+        setLoading(false);
       }
     };
 
@@ -63,8 +79,9 @@ export default function Dashboard() {
 
     return () => {
       isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
     };
-  }, []);
+  }, [session]);
 
   const sharedGradient = {
     type: 'gradient',
@@ -204,7 +221,7 @@ export default function Dashboard() {
 
   const npkChartSeries = [{
     name: 'NPK Values',
-    data: [SOIL_DATA.nitrogen, SOIL_DATA.phosphorus, SOIL_DATA.potassium]
+    data: [soilData.nitrogen, soilData.phosphorus, soilData.potassium]
   }];
 
   // Temperature Gauge Config
@@ -265,98 +282,17 @@ export default function Dashboard() {
 
   const tempGaugeSeries = [Math.min(Math.max((weatherData.temperature / 45) * 100, 0), 100)];
 
-  // pH Level Chart Config
-  const phChartOptions = {
-    chart: {
-      type: 'line',
-      height: 200,
-      toolbar: { show: false },
-      background: 'transparent',
-      animations: {
-        enabled: false
-      },
-      foreColor: 'var(--text-color)'
-    },
-    colors: ['var(--text-color)'],
-    stroke: {
-      show: true,
-      curve: 'straight',
-      width: 2,
-      colors: ['var(--text-color)']
-    },
-    markers: {
-      size: 5,
-      colors: ['var(--primary-color)'],
-      strokeWidth: 0,
-      hover: {
-        size: 7
-      }
-    },
-    grid: {
-      show: true,
-      borderColor: 'var(--input-border)',
-      strokeDashArray: 3,
-      position: 'back',
-      padding: {
-        top: 20,
-        right: 40,
-        bottom: 20,
-        left: 40
-      },
-      xaxis: {
-        lines: { show: false }
-      }
-    },
-    yaxis: {
-      min: 4,
-      max: 9,
-      tickAmount: 5,
-      labels: {
-        style: {
-          colors: 'var(--text-color)',
-          fontSize: '12px'
-        },
-        formatter: (value) => value.toFixed(1)
-      }
-    },
-    xaxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      labels: {
-        style: {
-          colors: 'var(--text-color)',
-          fontSize: '12px'
-        }
-      },
-      axisBorder: {
-        show: true,
-        color: 'var(--input-border)'
-      },
-      axisTicks: {
-        show: true,
-        color: 'var(--input-border)'
-      }
-    },
-    annotations: {
-      yaxis: []
-    },
-    tooltip: {
-      theme: theme,
-      y: {
-        formatter: function (val) {
-          return val.toFixed(1) + ' pH';
-        }
-      }
-    }
-  };
-
-  const phChartSeries = [{
-    name: 'pH Level',
-    type: 'line',
-    data: [6.3, 5.3, 6.7, soilData.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
-  }];
+  const phStatus = getPhStatus(soilData.pH);
 
   return (
-    <div className="page-container dashboard-container">
+    <div className="page-container dashboard-container" style={{ position: 'relative' }}>
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+          <div className="loading-text">Fetching Sensor Data...</div>
+        </div>
+      )}
+      
       <h1>Smart Farm Dashboard</h1>
 
       <div className="dashboard-grid">
@@ -471,14 +407,14 @@ export default function Dashboard() {
           </div>
           <div className="metrics-content">
             {activeSoilTab === 'ph' && (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <ReactApexChart
-                  options={phChartOptions}
-                  series={phChartSeries}
-                  type="line"
-                  height="200"
-                />
-                <div className="data-label">Current: {soilData.pH} pH</div>
+              <div className="ph-display">
+                <div className="ph-circle">
+                  <div className="ph-value">{soilData.pH.toFixed(1)}</div>
+                  <div className="ph-label">pH Level</div>
+                </div>
+                <div className="ph-status">
+                  {phStatus}
+                </div>
               </div>
             )}
             {activeSoilTab === 'npk' && (
