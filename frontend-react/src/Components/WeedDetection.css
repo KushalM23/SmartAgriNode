@@ -174,3 +174,60 @@
     padding: 0.875rem;
   }
 }
+
+/* Camera Mode Styles */
+.camera-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.submit-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  margin-bottom: 2rem;
+}
+
+.submit-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px var(--shadow-color);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--secondary-color);
+}
+
+.scan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.scan-card {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: transform 0.2s ease;
+}
+
+.scan-card:hover {
+  transform: translateY(-2px);
+}

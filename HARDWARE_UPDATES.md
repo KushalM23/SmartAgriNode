@@ -19,9 +19,9 @@ Flash this code to the main ESP32 controller. It handles:
 // ==========================================
 // 1. CONFIGURATION
 // ==========================================
-const char* ssid = "MOTOR-HEADS";         
-const char* password = "TMH@2425";        
-String serverIP = "192.168.1.9";       // <--- UPDATE THIS TO YOUR LAPTOP IP
+const char* ssid = "Rohan5G";         
+const char* password = "Jaihanuman27";        
+String serverIP = "192.168.31.151";       // <--- UPDATE THIS TO YOUR LAPTOP IP
 int serverPort = 5000;
 
 // ==========================================
@@ -55,7 +55,7 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\n WiFi Connected!");
-  myStepper.setSpeed(10); 
+  myStepper.setSpeed(5); 
 }
 
 void loop() {
@@ -67,26 +67,31 @@ void loop() {
        readAndSendSensorData();
        
     } else if(command == "START_WEED_SCAN") {
-       Serial.println(" Command: START_WEED_SCAN (360°)");
+       Serial.println(" Command: START_WEED_SCAN (360 deg)");
        
        // Perform 8 steps for 360 degrees
        for(int i=0; i<8; i++) {
-           Serial.printf(" Capture %d/8\n", i+1);
-           
-           // 1. Trigger Camera
-           digitalWrite(CAMERA_TRIGGER_PIN, HIGH); 
-           delay(100);                             
-           digitalWrite(CAMERA_TRIGGER_PIN, LOW);  
-           
-           // 2. Wait for Camera to Capture & Upload 
-           // (Give it enough time, e.g., 4-5 seconds per image)
-           delay(4000);                            
+           Serial.printf(" Step %d/8\n", i+1);
 
-           // 3. Move Motor (1/8th of a revolution)
+           // 1. Move Motor (1/8th of a revolution)
            // 2048 steps / 8 = 256 steps
            myStepper.step(256); 
-           delay(500); // Settle time
+           delay(1000); // Settle time
+           
+           // 2. Trigger Camera
+           Serial.println(" Triggering Camera...");
+           digitalWrite(CAMERA_TRIGGER_PIN, HIGH); 
+           delay(500);                             
+           digitalWrite(CAMERA_TRIGGER_PIN, LOW);  
+           
+           // 3. Wait for Camera to Capture & Upload 
+           // Increased delay to ensure upload completes
+           delay(6000);                            
        }
+       
+       // Extra delay to ensure the last image is processed
+       Serial.println(" Finalizing Scan...");
+       delay(5000);
        Serial.println(" Scan Complete");
        
     } else {
@@ -195,9 +200,9 @@ Flash this code to the ESP32-CAM module. It handles:
 // ==========================================
 // 1. CONFIGURATION
 // ==========================================
-const char* ssid = "MOTOR-HEADS";         
-const char* password = "TMH@2425";        
-String serverIP = "192.168.1.9";       // <--- UPDATE THIS TO YOUR LAPTOP IP
+const char* ssid = "Rohan5G";         
+const char* password = "Jaihanuman27";        
+String serverIP = "192.168.31.151";       // <--- UPDATE THIS TO YOUR LAPTOP IP
 int serverPort = 5000;
 
 // Pin Definitions (AI Thinker)
@@ -268,6 +273,7 @@ void loop() {
   if (digitalRead(TRIGGER_PIN) == HIGH) {
     Serial.println(" Trigger Received! Taking photo...");
     takePhotoAndUpload();
+    // Wait for trigger to go LOW to avoid multiple triggers
     while(digitalRead(TRIGGER_PIN) == HIGH) delay(10);
     delay(1000); 
   }
