@@ -2,7 +2,7 @@
 
 A comprehensive web dashboard that leverages machine learning for crop recommendation and weed detection in agriculture.
 
-## 🚀 Live Demo
+## Live Demo
 
 **Access the live application here:** [https://smart-agri-node.vercel.app](https://smart-agri-node.vercel.app)
 
@@ -175,10 +175,12 @@ The script will automatically install frontend dependencies (npm install) if mis
 
 ### Dashboard
 - Navigate to "Dashboard" page (requires authentication)
-- View soil and climate insights with interactive charts
-- Monitor temperature, humidity, and rainfall with radial gauges
-- Track soil pH levels with line charts
-- View NPK (Nitrogen, Phosphorus, Potassium) values with bar charts
+- **Real-time Data**: Automatically fetches live sensor data from connected hardware (ESP32)
+- **Climate Insights**: Monitor temperature, humidity, and rainfall with interactive radial gauges (powered by OpenMeteo)
+- **Soil Health**: 
+  - View current pH levels with a clear, theme-consistent circular display
+  - Analyze NPK (Nitrogen, Phosphorus, Potassium) values with precise bar charts
+- **Loading State**: Visual feedback while waiting for hardware data synchronization
 
 ## API Endpoints
 

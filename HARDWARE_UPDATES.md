@@ -54,7 +54,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\n✅ WiFi Connected!");
+  Serial.println("\n WiFi Connected!");
   myStepper.setSpeed(10); 
 }
 
@@ -63,15 +63,15 @@ void loop() {
     String command = checkServerCommand();
     
     if(command == "MEASURE_SENSORS") {
-       Serial.println("📊 Command: MEASURE_SENSORS");
+       Serial.println(" Command: MEASURE_SENSORS");
        readAndSendSensorData();
        
     } else if(command == "START_WEED_SCAN") {
-       Serial.println("🚀 Command: START_WEED_SCAN (360°)");
+       Serial.println(" Command: START_WEED_SCAN (360°)");
        
        // Perform 8 steps for 360 degrees
        for(int i=0; i<8; i++) {
-           Serial.printf("📸 Capture %d/8\n", i+1);
+           Serial.printf(" Capture %d/8\n", i+1);
            
            // 1. Trigger Camera
            digitalWrite(CAMERA_TRIGGER_PIN, HIGH); 
@@ -87,14 +87,14 @@ void loop() {
            myStepper.step(256); 
            delay(500); // Settle time
        }
-       Serial.println("✅ Scan Complete");
+       Serial.println(" Scan Complete");
        
     } else {
-       Serial.println("💤 Status: Idle...");
+       Serial.println(" Status: Idle...");
        delay(2000); 
     }
   } else {
-    Serial.println("❌ WiFi Disconnected");
+    Serial.println(" WiFi Disconnected");
     delay(1000);
   }
 }
@@ -114,7 +114,7 @@ String checkServerCommand() {
     // Remove quotes if present
     payload.replace("\"", "");
   } else {
-    Serial.print("⚠️ Error connecting to Server. HTTP Code: ");
+    Serial.print(" Error connecting to Server. HTTP Code: ");
     Serial.println(httpCode);
   }
   
@@ -146,7 +146,7 @@ void readAndSendSensorData() {
     valPhosphorus = (values[5] << 8) | values[6];
     valPotassium = (values[7] << 8) | values[8];
   } else {
-    Serial.println("⚠️ NPK Sensor not responding (Using Failsafe Data)");
+    Serial.println(" NPK Sensor not responding (Using Failsafe Data)");
     valNitrogen = random(20, 150);
     valPhosphorus = random(20, 150);
     valPotassium = random(20, 150);
@@ -169,9 +169,9 @@ void readAndSendSensorData() {
   int httpResponseCode = http.POST(json);
   
   if (httpResponseCode == 200) {
-    Serial.println("✅ Data Uploaded Successfully!");
+    Serial.println(" Data Uploaded Successfully!");
   } else {
-    Serial.print("❌ Upload Failed: ");
+    Serial.print(" Upload Failed: ");
     Serial.println(httpResponseCode);
   }
 
@@ -250,7 +250,7 @@ void setup() {
 
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("❌ Camera Init Failed 0x%x", err);
+    Serial.printf("Camera Init Failed 0x%x", err);
     return;
   }
 
@@ -259,14 +259,14 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\n✅ WiFi Connected!");
+  Serial.println("\n WiFi Connected!");
   
   pinMode(TRIGGER_PIN, INPUT_PULLDOWN); 
 }
 
 void loop() {
   if (digitalRead(TRIGGER_PIN) == HIGH) {
-    Serial.println("📸 Trigger Received! Taking photo...");
+    Serial.println(" Trigger Received! Taking photo...");
     takePhotoAndUpload();
     while(digitalRead(TRIGGER_PIN) == HIGH) delay(10);
     delay(1000); 
@@ -277,7 +277,7 @@ void loop() {
 void takePhotoAndUpload() {
   camera_fb_t * fb = esp_camera_fb_get();
   if (!fb) {
-    Serial.println("❌ Camera capture failed");
+    Serial.println(" Camera capture failed");
     return;
   }
 
@@ -291,9 +291,9 @@ void takePhotoAndUpload() {
   int httpResponseCode = http.POST(fb->buf, fb->len);
 
   if (httpResponseCode == 200) {
-    Serial.println("✅ Image Uploaded Successfully!");
+    Serial.println(" Image Uploaded Successfully!");
   } else {
-    Serial.printf("❌ Upload Failed, Error: %d\n", httpResponseCode);
+    Serial.printf(" Upload Failed, Error: %d\n", httpResponseCode);
   }
 
   esp_camera_fb_return(fb); 
