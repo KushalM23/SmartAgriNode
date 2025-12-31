@@ -13,6 +13,8 @@ A comprehensive web dashboard that leverages machine learning for crop recommend
 - **Crop Recommendation**: AI-powered crop suggestions based on soil and environmental parameters
 - **Weed Detection**: Advanced image processing to identify weeds in agricultural images (Optimized with ONNX)
 - **Dashboard**: Interactive web dashboard for viewing soil and climate insights
+- **Real-time Weather**: Integrated OpenMeteo API for live location-based weather data
+- **Hardware Integration**: Support for ESP32 sensors and ESP32-CAM for automated data collection and scanning
 - **User History**: Automatic tracking of recommendations and detections (stored in Supabase)
 
 ## Technology Stack
@@ -65,8 +67,17 @@ SmartAgriNode/
 ├── requirements.txt             # Python backend dependencies
 ├── start_servers.py             # Start both servers together
 ├── PRD.md                       # Product Requirements Document
+├── HARDWARE_UPDATES.md          # ESP32 & ESP32-CAM Firmware Code
 └── README.md                    # This file
 ```
+
+## Hardware Setup
+
+This project includes support for IoT hardware integration:
+- **Sensor Node (ESP32)**: Collects NPK, pH, and Moisture data.
+- **Vision Node (ESP32-CAM)**: Performs 360° weed scanning and image upload.
+
+For detailed firmware code and wiring instructions, please refer to [HARDWARE_UPDATES.md](HARDWARE_UPDATES.md).
 
 ## Local Development Setup
 

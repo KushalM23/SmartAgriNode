@@ -430,3 +430,47 @@ class SupabaseDB:
         """
         await SupabaseDB.delete_avatar_file(user_id)
         return await SupabaseDB.clear_avatar_reference(user_id)
+
+    @staticmethod
+    async def create_field_scan(user_id: str) -> Dict[str, Any]:
+        """Create a new field scan entry"""
+        if not supabase:
+            return {}
+        try:
+            data = {"user_id": user_id, "status": "pending"}
+            result = supabase.table("field_scans").insert(data).execute()
+            return result.data[0] if result.data else {}
+        except Exception:
+            logger.exception("Error creating field scan")
+            return {}
+
+    @staticmethod
+    async def update_field_scan(scan_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an existing field scan"""
+        if not supabase:
+            return {}
+        try:
+            result = supabase.table("field_scans").update(updates).eq("id", scan_id).execute()
+            return result.data[0] if result.data else {}
+        except Exception:
+            logger.exception("Error updating field scan")
+            return {}
+
+    @staticmethod
+    async def get_latest_pending_scan(user_id: str) -> Optional[Dict[str, Any]]:
+        """Get the latest pending scan for a user"""
+        if not supabase:
+            return None
+        try:
+            result = supabase.table("field_scans")\
+                .select("*")\
+                .eq("user_id", user_id)\
+                .eq("status", "pending")\
+                .order("created_at", desc=True)\
+                .limit(1)\
+                .execute()
+            return result.data[0] if result.data else None
+        except Exception:
+            logger.exception("Error fetching pending scan")
+            return None
+

@@ -90,7 +90,14 @@ export const api = {
         return data;
     },
 
-    deleteAvatar: (token) => request('/delete-avatar', { method: 'DELETE' }, token)
+    deleteAvatar: (token) => request('/delete-avatar', { method: 'DELETE' }, token),
+
+    // Device operations
+    triggerSensorMeasurement: (token) => request('/device/command/sensors', { method: 'POST' }, token),
+    triggerWeedScan: (token) => request('/device/command/weed-scan', { method: 'POST' }, token),
+    getLatestSensors: (token) => request('/device/sensors/latest', { method: 'GET' }, token),
+    getWeedScanResults: (token) => request('/device/weed-scan/results', { method: 'GET' }, token),
 };
+
 
 

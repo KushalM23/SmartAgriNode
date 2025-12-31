@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './Context/AuthContext';
 import { ThemeProvider, useTheme } from './Context/ThemeContext';
+import { WeatherProvider } from './Context/WeatherContext';
 import NavBar from "./Components/NavBar";
 import Footer from "./Components/Footer";
 import './App.css';
@@ -91,7 +92,9 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <AppContent />
+        <WeatherProvider>
+          <AppContent />
+        </WeatherProvider>
       </ThemeProvider>
     </AuthProvider>
   );

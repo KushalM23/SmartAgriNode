@@ -21,6 +21,9 @@ from pydantic import BaseModel, Field
 from ultralytics import YOLO
 
 from database import SupabaseDB
+from ml_utils import get_crop_model, get_weed_model
+from routers import device
+from auth import verify_supabase_token
 
 logger = logging.getLogger("SmartAgriNode.backend")
 
@@ -69,32 +72,8 @@ model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Models')
 upload_dir = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(upload_dir, exist_ok=True)
 
-crop_model = None
-weed_model = None
 crop_model_path = os.path.join(model_dir, 'crop_recommendation_model.pkl')
 weed_model_path = os.path.join(model_dir, 'weed_detection_model.onnx')
-
-def get_crop_model():
-    global crop_model
-    if crop_model is None and os.path.exists(crop_model_path):
-        try:
-            crop_model = joblib.load(crop_model_path)
-            logger.info("Crop recommendation model loaded successfully")
-        except Exception:
-            logger.exception("Error loading crop recommendation model")
-            crop_model = None
-    return crop_model
-
-def get_weed_model():
-    global weed_model
-    if weed_model is None and os.path.exists(weed_model_path):
-        try:
-            weed_model = YOLO(weed_model_path, task='detect')
-            logger.info("Weed detection model loaded successfully")
-        except Exception:
-            logger.exception("Error loading weed detection model")
-            weed_model = None
-    return weed_model
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -124,6 +103,9 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json"
 )
+
+# Include routers
+app.include_router(device.router)
 
 # CORS configuration
 app.add_middleware(
@@ -191,41 +173,6 @@ class AvatarResponse(BaseModel):
     """Response model for avatar upload"""
     avatar_url: str
     message: str
-
-# Supabase JWT verification
-async def verify_supabase_token(authorization: Optional[str] = Header(None)) -> dict:
-    """
-    Verify Supabase JWT token from Authorization header
-    Returns user data if valid, raises HTTPException if invalid
-    """
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization header missing")
-    
-    # Extract token from "Bearer <token>"
-    try:
-        scheme, token = authorization.split()
-        if scheme.lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Invalid authentication scheme")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid authorization header format")
-    
-    # Verify token using Supabase client
-    try:
-        user = await SupabaseDB.verify_jwt(token)
-        
-        if user:
-            user_id = user.get("id") or user.get("user_id")
-            logger.info("Token verified for user %s", user_id)
-            return {
-                "user_id": user_id,
-                "email": user.get("email")
-            }
-        else:
-            logger.warning("Token verification failed: verify_jwt returned None")
-            raise HTTPException(status_code=401, detail="Invalid token or expired session")
-    except Exception as e:
-        logger.error(f"Token verification error: {str(e)}")
-        raise HTTPException(status_code=401, detail="Invalid token or expired session")
 
 # API Routes
 

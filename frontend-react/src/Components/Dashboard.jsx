@@ -2,25 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import ReactApexChart from 'react-apexcharts';
 import { useTheme } from '../Context/ThemeContext';
-import { fetchWeatherApi } from 'openmeteo';
-
-const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
-const WEATHER_PARAMS = {
-  hourly: ['temperature_2m', 'relative_humidity_2m'],
-  current: ['precipitation', 'temperature_2m', 'relative_humidity_2m'],
-  timezone: 'auto'
-};
-
-const DEFAULT_COORDS = {
-  latitude: 12.9719,
-  longitude: 77.5937
-};
-
-const INITIAL_WEATHER = {
-  temperature: 23.09,
-  humidity: 84.86,
-  rainfall: 71.29
-};
+import { useAuth } from '../Context/AuthContext';
+import { useWeather } from '../Context/WeatherContext';
+import { api } from '../lib/api';
 
 const SOIL_DATA = {
   pH: 6.92,
@@ -33,65 +17,49 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('temperature');
   const [activeSoilTab, setActiveSoilTab] = useState('ph');
   const { theme } = useTheme();
-  const [weatherData, setWeatherData] = useState(INITIAL_WEATHER);
+  const { session } = useAuth();
+  const { weatherData } = useWeather();
+  const [soilData, setSoilData] = useState(SOIL_DATA);
 
   useEffect(() => {
     let isMounted = true;
 
-    const parseCoordinate = (value, fallback) => {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : fallback;
-    };
-
-    const loadWeather = async () => {
+    // Trigger sensor measurement on mount if logged in
+    const fetchSensorData = async () => {
+      if (!session?.access_token) return;
+      
       try {
-        const latitude = parseCoordinate(import.meta.env?.VITE_OPEN_METEO_LAT, DEFAULT_COORDS.latitude);
-        const longitude = parseCoordinate(import.meta.env?.VITE_OPEN_METEO_LON, DEFAULT_COORDS.longitude);
-
-        const responses = await fetchWeatherApi(OPEN_METEO_URL, {
-          ...WEATHER_PARAMS,
-          latitude,
-          longitude
-        });
-
-        const response = responses[0];
-        if (!response) {
-          return;
-        }
-
-        const current = response.current();
-        if (!current || typeof current.variables !== 'function') {
-          return;
-        }
-
-        const getVariableValue = (index) => {
+        // 1. Trigger measurement
+        await api.triggerSensorMeasurement(session.access_token);
+        
+        // 2. Poll for results
+        const pollInterval = setInterval(async () => {
+          if (!isMounted) return;
           try {
-            const variable = current.variables(index);
-            return typeof variable?.value === 'function' ? variable.value() : undefined;
-          } catch (error) {
-            console.error('Failed to read Open-Meteo variable', error);
-            return undefined;
+            const res = await api.getLatestSensors(session.access_token);
+            if (res.status === 'complete' && res.data) {
+              clearInterval(pollInterval);
+              setSoilData({
+                pH: res.data.ph,
+                nitrogen: res.data.N,
+                phosphorus: res.data.P,
+                potassium: res.data.K
+              });
+            }
+          } catch (e) {
+            console.error("Polling error", e);
           }
-        };
+        }, 2000);
 
-        const precipitation = getVariableValue(0);
-        const temperature = getVariableValue(1);
-        const humidity = getVariableValue(2);
-
-        if (isMounted) {
-          setWeatherData((prev) => ({
-            temperature: typeof temperature === 'number' ? Number(temperature.toFixed(2)) : prev.temperature,
-            humidity: typeof humidity === 'number' ? Number(humidity.toFixed(2)) : prev.humidity,
-            rainfall: typeof precipitation === 'number' ? Number(precipitation.toFixed(2)) : prev.rainfall
-          }));
-        }
-      } catch (error) {
-        console.error('Unable to load Open-Meteo weather data', error);
+        // Stop polling after 30 seconds
+        setTimeout(() => clearInterval(pollInterval), 30000);
+        
+      } catch (e) {
+        console.error("Failed to trigger sensors", e);
       }
     };
 
-    // Pull live weather metrics once on mount.
-    loadWeather();
+    fetchSensorData();
 
     return () => {
       isMounted = false;
@@ -384,7 +352,7 @@ export default function Dashboard() {
   const phChartSeries = [{
     name: 'pH Level',
     type: 'line',
-    data: [6.3, 5.3, 6.7, SOIL_DATA.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
+    data: [6.3, 5.3, 6.7, soilData.pH, 6.6, 6.4, 7.2].map(val => parseFloat(val.toFixed(1))),
   }];
 
   return (
@@ -510,7 +478,7 @@ export default function Dashboard() {
                   type="line"
                   height="200"
                 />
-                <div className="data-label">Current: {SOIL_DATA.pH} pH</div>
+                <div className="data-label">Current: {soilData.pH} pH</div>
               </div>
             )}
             {activeSoilTab === 'npk' && (

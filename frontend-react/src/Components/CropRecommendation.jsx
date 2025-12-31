@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../Context/AuthContext';
+import { useWeather } from '../Context/WeatherContext';
 import { api } from '../lib/api';
 import './CropRecommendation.css';
 
 export default function CropRecommendation() {
   const { session } = useAuth();
+  const { weatherData } = useWeather();
   const [formData, setFormData] = useState({
     N: '',
     P: '',
@@ -17,6 +19,8 @@ export default function CropRecommendation() {
   const [result, setResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchingSensors, setFetchingSensors] = useState(false);
+  const [inputMode, setInputMode] = useState('manual'); // 'manual' | 'sensor'
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -25,6 +29,49 @@ export default function CropRecommendation() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const fetchSensorData = async () => {
+    if (!session) { setError('Please log in to use sensors'); return; }
+    setFetchingSensors(true);
+    setError('');
+    try {
+      const token = session.access_token;
+      await api.triggerSensorMeasurement(token);
+      
+      // Poll for results
+      let attempts = 0;
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        try {
+          const res = await api.getLatestSensors(token);
+          if (res.status === 'complete' && res.data) {
+            clearInterval(pollInterval);
+            setFormData(prev => ({
+              ...prev,
+              N: parseFloat(res.data.N).toFixed(1),
+              P: parseFloat(res.data.P).toFixed(1),
+              K: parseFloat(res.data.K).toFixed(1),
+              ph: parseFloat(res.data.ph).toFixed(1),
+              temperature: weatherData.temperature?.toFixed(1),
+              humidity: weatherData.humidity?.toFixed(1),
+              rainfall: weatherData.rainfall?.toFixed(1)
+            }));
+            setFetchingSensors(false);
+          } else if (attempts > 15) { // 30 seconds timeout
+            clearInterval(pollInterval);
+            setFetchingSensors(false);
+            setError('Sensor timeout. Please try again.');
+          }
+        } catch (e) {
+          console.error("Polling error", e);
+        }
+      }, 2000);
+    } catch (err) {
+      console.error("Sensor trigger error:", err);
+      setError('Failed to trigger sensors');
+      setFetchingSensors(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -60,6 +107,35 @@ export default function CropRecommendation() {
   return (
     <div className="page-container">
       <h1>Crop Recommendation</h1>
+      
+      <div className="tabs" style={{ margin: '0 auto 2rem auto', maxWidth: '400px' }}>
+        <button 
+          className={`tab ${inputMode === 'manual' ? 'active' : ''}`}
+          onClick={() => setInputMode('manual')}
+        >
+          Manual Input
+        </button>
+        <button 
+          className={`tab ${inputMode === 'sensor' ? 'active' : ''}`}
+          onClick={() => setInputMode('sensor')}
+        >
+          Use Sensor Data
+        </button>
+      </div>
+
+      {inputMode === 'sensor' && (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <button 
+            onClick={fetchSensorData} 
+            disabled={fetchingSensors}
+            className="submit-button"
+            style={{ maxWidth: '300px' }}
+          >
+            {fetchingSensors ? 'Fetching from Hardware...' : 'Fetch Sensor Data'}
+          </button>
+        </div>
+      )}
+
       <div className="recommendation-content">
         <div className="recommendation-form">
           <form onSubmit={handleSubmit}>
@@ -124,8 +200,8 @@ export default function CropRecommendation() {
                   className="form-control"
                   placeholder="Enter temperature"
                   step="0.1"
-                  min="5"
-                  max="40"
+                  min="0"
+                  max="45"
                   required
                 />
               </div>
@@ -173,7 +249,7 @@ export default function CropRecommendation() {
                   onChange={handleChange}
                   className="form-control"
                   placeholder="Enter rainfall"
-                  min="20"
+                  min="0"
                   max="5000"
                   step="0.1"
                   required
