@@ -26,60 +26,65 @@ export default function Dashboard() {
   const { session } = useAuth();
   const { weatherData } = useWeather();
   const [soilData, setSoilData] = useState(SOIL_DATA);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Add refs to track mounting and polling
+  const isMounted = React.useRef(true);
+  const pollInterval = React.useRef(null);
+
+  // Define the fetch function outside useEffect
+  const fetchSensorData = async () => {
+    if (!session?.access_token) {
+      setLoading(false);
+      return;
+    }
+    
+    // Clear any existing interval to prevent duplicates
+    if (pollInterval.current) clearInterval(pollInterval.current);
+
+    try {
+      setLoading(true);
+      // 1. Trigger measurement
+      await api.triggerSensorMeasurement(session.access_token);
+      
+      // 2. Poll for results
+      pollInterval.current = setInterval(async () => {
+        if (!isMounted.current) return;
+        try {
+          const res = await api.getLatestSensors(session.access_token);
+          if (res.status === 'complete' && res.data) {
+            clearInterval(pollInterval.current);
+            setSoilData({
+              pH: parseFloat(res.data.ph.toFixed(1)),
+              nitrogen: parseFloat(res.data.N.toFixed(1)),
+              phosphorus: parseFloat(res.data.P.toFixed(1)),
+              potassium: parseFloat(res.data.K.toFixed(1))
+            });
+            setLoading(false);
+          }
+        } catch (e) {
+          console.error("Polling error", e);
+        }
+      }, 2000);
+
+      // Stop polling after 30 seconds
+      setTimeout(() => {
+          if (pollInterval.current) clearInterval(pollInterval.current);
+          if(isMounted.current) setLoading(false);
+      }, 30000);
+      
+    } catch (e) {
+      console.error("Failed to trigger sensors", e);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    let pollInterval;
-
-    const fetchSensorData = async () => {
-      if (!session?.access_token) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        setLoading(true);
-        // 1. Trigger measurement
-        await api.triggerSensorMeasurement(session.access_token);
-        
-        // 2. Poll for results
-        pollInterval = setInterval(async () => {
-          if (!isMounted) return;
-          try {
-            const res = await api.getLatestSensors(session.access_token);
-            if (res.status === 'complete' && res.data) {
-              clearInterval(pollInterval);
-              setSoilData({
-                pH: parseFloat(res.data.ph.toFixed(1)),
-                nitrogen: parseFloat(res.data.N.toFixed(1)),
-                phosphorus: parseFloat(res.data.P.toFixed(1)),
-                potassium: parseFloat(res.data.K.toFixed(1))
-              });
-              setLoading(false);
-            }
-          } catch (e) {
-            console.error("Polling error", e);
-          }
-        }, 2000);
-
-        // Stop polling after 30 seconds
-        setTimeout(() => {
-            clearInterval(pollInterval);
-            if(isMounted) setLoading(false);
-        }, 30000);
-        
-      } catch (e) {
-        console.error("Failed to trigger sensors", e);
-        setLoading(false);
-      }
-    };
-
-    fetchSensorData();
-
+    isMounted.current = true;
+    
     return () => {
-      isMounted = false;
-      if (pollInterval) clearInterval(pollInterval);
+      isMounted.current = false;
+      if (pollInterval.current) clearInterval(pollInterval.current);
     };
   }, [session]);
 
@@ -285,7 +290,7 @@ export default function Dashboard() {
   const phStatus = getPhStatus(soilData.pH);
 
   return (
-    <div className="page-container dashboard-container" style={{ position: 'relative' }}>
+    <div className="page-container dashboard-container">
       {loading && (
         <div className="loading-overlay">
           <div className="spinner"></div>
@@ -293,7 +298,13 @@ export default function Dashboard() {
         </div>
       )}
       
-      <h1>Smart Farm Dashboard</h1>
+      {/* Updated Header with Button */}
+      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h1 style={{ margin: 0, textAlign: 'left' }}>Smart Farm Dashboard</h1>
+        <button className="fetch-btn" onClick={fetchSensorData} disabled={loading}>
+          {loading ? 'Fetching...' : 'Fetch Data'}
+        </button>
+      </div>
 
       <div className="dashboard-grid">
         <div className="dashboard-card metrics-card">

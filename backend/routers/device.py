@@ -41,8 +41,12 @@ async def trigger_sensor_measurement(background_tasks: BackgroundTasks, user: di
     # Clear previous data
     LATEST_SENSOR_DATA['default'] = None
     
-    # Simulate hardware response if offline (Fallback)
-    background_tasks.add_task(simulate_sensor_data)
+    # Check if fallback is enabled
+    use_fallback = os.getenv("USE_HARDWARE_FALLBACK", "True").lower() == "true"
+    
+    if use_fallback:
+        # Simulate hardware response if offline (Fallback)
+        background_tasks.add_task(simulate_sensor_data)
     
     return {"message": "Sensor measurement requested"}
 
@@ -58,8 +62,12 @@ async def trigger_weed_scan(background_tasks: BackgroundTasks, user: dict = Depe
     # Clear previous results
     WEED_SCAN_RESULTS['default'] = []
     
-    # Simulate hardware response if offline (Fallback)
-    background_tasks.add_task(simulate_weed_scan)
+    # Check if fallback is enabled
+    use_fallback = os.getenv("USE_HARDWARE_FALLBACK", "True").lower() == "true"
+    
+    if use_fallback:
+        # Simulate hardware response if offline (Fallback)
+        background_tasks.add_task(simulate_weed_scan)
     
     return {"message": "Weed scan requested"}
 

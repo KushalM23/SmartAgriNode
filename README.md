@@ -79,6 +79,36 @@ This project includes support for IoT hardware integration:
 
 For detailed firmware code and wiring instructions, please refer to [HARDWARE_UPDATES.md](HARDWARE_UPDATES.md).
 
+## System Architecture & Data Flow
+
+### 1. Sensor Data Request Flow
+The system uses an asynchronous command-polling architecture to communicate with the ESP32 sensor node.
+
+1.  **User Action**: User loads the Dashboard or clicks "Fetch Data".
+2.  **Frontend Request**: React app sends a `POST /api/device/command/sensors` request to the backend.
+3.  **Command Queuing**: Backend sets a global flag `COMMAND_QUEUE['default'] = "MEASURE_SENSORS"`.
+4.  **Hardware Polling**: The ESP32 constantly polls `GET /api/device/check-command` every few seconds.
+5.  **Command Execution**: 
+    *   ESP32 receives the "MEASURE_SENSORS" command.
+    *   It reads data from the RS485 NPK sensor and Analog Soil Moisture sensor.
+    *   It sends the data back via `POST /api/device/update-sensors`.
+6.  **Data Retrieval**: The Frontend, which has been polling `GET /api/device/sensors/latest`, receives the new data and updates the UI.
+
+### 2. Camera Scan Request Flow
+Similar to sensors, the camera operation is command-driven but involves image processing.
+
+1.  **User Action**: User initiates a scan from the Weed Detection page.
+2.  **Frontend Request**: React app sends `POST /api/device/command/weed-scan`.
+3.  **Command Queuing**: Backend sets `COMMAND_QUEUE['default'] = "START_WEED_SCAN"`.
+4.  **Hardware Execution**:
+    *   ESP32 receives "START_WEED_SCAN".
+    *   It rotates the stepper motor 45 degrees.
+    *   It triggers the ESP32-CAM to take a photo.
+    *   ESP32-CAM uploads the image to `POST /api/device/upload-image`.
+    *   This repeats 8 times for a full 360° view.
+5.  **Processing**: Backend receives the image, runs the YOLOv8 model, counts weeds, and stores the result.
+6.  **Result Display**: Frontend polls for results and displays the processed images and weed counts.
+
 ## Local Development Setup
 
 If you want to run the project locally or contribute, follow these steps:
